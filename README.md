@@ -8,7 +8,7 @@ To install, use: `pip install git+https://github.com/aaronengland/nfl_prediction
 
 Arguments:
 - year: season to simulate.
-- weighted_mean: use of weighted mean in simulation (boolean; default=False; False is recommended for early in the season whiule True is recommended for later games).
+- weighted_mean: use of weighted mean in simulation (boolean; default=False; False is recommended for early in the season while True is recommended for later games).
 - n_simulations: number of simulations for each game (default=1000).
 
 Returns a data frame with predicted results for the upcoming week's games.
@@ -31,7 +31,7 @@ upcoming_week_simulation
 
 Arguments:
 - year: season to simulate.
-- weighted_mean: use of weighted mean in simulation (boolean; default=False; False is recommended for early in the season whiule True is recommended for later games).
+- weighted_mean: use of weighted mean in simulation (boolean; default=False; False is recommended for early in the season while True is recommended for later games).
 - n_simulations: number of simulations for each game (default=1000).
 
 Attributes:
