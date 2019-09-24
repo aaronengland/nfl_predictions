@@ -1,6 +1,6 @@
 # nfl_predictions
 
-To install, use: `pip install git+https://github.com/aaronengland/nfl_ppredictions.git`
+To install, use: `pip install git+https://github.com/aaronengland/nfl_predictions.git`
 
 ## nfl_pickem
 
