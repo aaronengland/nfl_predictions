@@ -66,3 +66,5 @@ df_NFC_division_standings = simulated_season.df_NFC_div
 # get AFC sorted by division and wins
 df_AFC_division_standings = simulated_season.df_AFC_div
 ```
+
+---
