@@ -7,9 +7,9 @@ To install, use: `pip install git+https://github.com/aaronengland/nfl_prediction
 ## nfl_pickem
 
 Arguments:
-- year: season to simulate.
-- weighted_mean: use of weighted mean in simulation (boolean; default=False; False is recommended for early in the season while True is recommended for later games).
-- n_simulations: number of simulations for each game (default=1000).
+- `year`: season to simulate.
+- `weighted_mean`: use of weighted mean in simulation (boolean; default=False; False is recommended for early in the season while True is recommended for later games).
+- `n_simulations`: number of simulations for each game (default=1000).
 
 Returns a data frame with predicted results for the upcoming week's games.
 
@@ -30,17 +30,17 @@ upcoming_week_simulation
 ## nfl_season_simulation
 
 Arguments:
-- year: season to simulate.
-- weighted_mean: use of weighted mean in simulation (boolean; default=False; False is recommended for early in the season while True is recommended for later games).
-- n_simulations: number of simulations for each game (default=1000).
+- `year`: season to simulate.
+- `weighted_mean`: use of weighted mean in simulation (boolean; default=False; False is recommended for early in the season while True is recommended for later games).
+- `n_simulations`: number of simulations for each game (default=1000).
 
 Attributes:
-- df_simulated_season: data frame of all played and simulated games in season.
-- df_final_win_predictions_conf: data frame of predicted wins.
-- df_NFC: data frame of predicted wins (NFC only).
-- df_AFC: data frame of predicted wins (AFC only).
-- df_NFC_div: data frame of predicted wins in NFC sortted by division.
-- df_AFC_div: data frame of predicted wins in AFC sortted by division
+- `df_simulated_season`: data frame of all played and simulated games in season.
+- `df_final_win_predictions_conf`: data frame of predicted wins.
+- `df_NFC`: data frame of predicted wins (NFC only).
+- `df_AFC`: data frame of predicted wins (AFC only).
+- `df_NFC_div`: data frame of predicted wins in NFC sortted by division.
+- `df_AFC_div`: data frame of predicted wins in AFC sortted by division
 
 Example:
 
