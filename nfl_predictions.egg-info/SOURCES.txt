@@ -1,0 +1,7 @@
+setup.py
+nfl_predictions/__init__.py
+nfl_predictions.egg-info/PKG-INFO
+nfl_predictions.egg-info/SOURCES.txt
+nfl_predictions.egg-info/dependency_links.txt
+nfl_predictions.egg-info/not-zip-safe
+nfl_predictions.egg-info/top_level.txt
