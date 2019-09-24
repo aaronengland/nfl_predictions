@@ -21,6 +21,7 @@ upcoming_week_simulation = nfl_pickem(year=2019, weighted_mean=False, n_simulati
 
 # view results
 upcoming_week_simulation
+```
 
 ---
 
