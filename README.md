@@ -1,6 +1,6 @@
 # nfl_predictions
 
-A package for scraping the user-defined NFL season's schedule/results and simulating the upcoming week's games (`nfl_pickem`) and the unplayed games for the entire season (`nfl_season_simulation`).
+A package for scraping the user-defined NFL season's schedule/results and simulating the upcoming week's games (`nfl_pickem`) and the unplayed games for the entire season (`nfl_season_simulation`) using the `game_predictions` algorithm.
 
 To install, use: `pip install git+https://github.com/aaronengland/nfl_predictions.git`
 
