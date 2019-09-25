@@ -70,3 +70,23 @@ df_AFC_division_standings = simulated_season.df_AFC_div
 ```
 
 ---
+
+## nfl_postseason_probabilities
+
+Arguments:
+- `year`: season to simulate.
+- `n_simulations`: number of seasons to simulate.
+- `weighted_mean`: use of weighted mean in simulation (boolean; default=False; False is recommended for early in the season while True is recommended for later games).
+
+Returns a data frame with columns for probability of postseason, conference champion, and super bowl champion.
+
+Example:
+
+```
+from nfl_predictions import nfl_postseason_probabilities
+
+# get probabilities
+df_postseason_probabilities = nfl_postseason_probabilities(year=2019, n_simulations=100, weighted_mean=False)
+```
+
+---
