@@ -365,7 +365,449 @@ def nfl_season_simulation(year, weighted_mean=False, n_simulations=1000):
     x = attributes(df_simulated_season, df_final_win_predictions_conf, df_NFC, df_AFC, df_NFC_div, df_AFC_div)
     return x
 
-
+# define function for postseason probabilities
+def nfl_postseason_probabilities(year, n_simulations, weighted_mean=False):
+    # get the unique teams
+    list_teams = list(pd.read_csv('https://raw.githubusercontent.com/aaronengland/data/master/nfl_teams_conferences.csv')['Name'])
+    # make data frame with just teams for postseason
+    df_teams_postseason = pd.DataFrame({'team': list_teams})
+    # make data frame with just teams for conference champs
+    df_teams_conference_champs = pd.DataFrame({'team': list_teams})
+    # make data frame with just teams for superbowl champs
+    df_teams_superbowl_champs = pd.DataFrame({'team': list_teams})
+    
+    # user defined number of simulations
+    for x in range(n_simulations):
+        # simulate season
+        simulated_season = nfl_season_simulation(year=year, weighted_mean=False, n_simulations=1)
+        
+        # get the simulated season to help with playoff predictions later
+        df_entire_season = simulated_season.df_simulated_season
+        
+        ########################### start with NFC ####################################
+        
+        # get standings for NFC
+        df_division_standings = simulated_season.df_NFC_div
+        
+        # instantiate list of divisions
+        list_divisions = ['North','East','South','West']
+        
+        # get division champs
+        list_divsion_champs = []
+        list_division_champ_wins = []
+        for division in list_divisions:
+            # get division champ
+            division_champ = df_division_standings[df_division_standings['Division'] == division]['team'].iloc[0]
+            # append to list
+            list_divsion_champs.append(division_champ)
+            # get wins
+            division_champ_wins = df_division_standings[df_division_standings['Division'] == division]['wins'].iloc[0]
+            # append to list
+            list_division_champ_wins.append(division_champ_wins)
+        
+        # put into df
+        df_postseason_teams = pd.DataFrame({'team': list_divsion_champs,
+                                            'wins': list_division_champ_wins})
+          
+        # sort by wins
+        df_postseason_teams = df_postseason_teams.sort_values(by=['wins'], ascending=False)
+            
+        # put series into lists
+        list_playoff_teams = list(df_postseason_teams['team'])
+        list_playoff_teams_wins = list(df_postseason_teams['wins'])
+        
+        # get the wildcard teams
+        
+        # sort df_NFC_division_standings
+        df_division_standings = df_division_standings.sort_values(by=['wins'], ascending=False)
+        
+        # remove teams in list_divsion_champs
+        df_division_standings_no_champs = df_division_standings[~df_division_standings['team'].isin(list_divsion_champs)]
+        
+        # get the teams and wins for teams with the top 2 records
+        for i in range(0,2):
+            wildcard_team = df_division_standings_no_champs['team'].iloc[i]
+            # append to list
+            list_playoff_teams.append(wildcard_team)
+            # get wins
+            wildcard_team_wins = df_division_standings_no_champs['wins'].iloc[i]
+            # append to list
+            list_playoff_teams_wins.append(wildcard_team_wins)
+        
+        # put into df
+        df_nfc_postseason_teams = pd.DataFrame({'team': list_playoff_teams,
+                                                'wins': list_playoff_teams_wins})
+        
+        # wildcard game 1
+        # 3 vs 6
+        home_team = df_nfc_postseason_teams['team'].iloc[2]
+        away_team = df_nfc_postseason_teams['team'].iloc[5]
+        # simulate game
+        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
+                                           home_score_array=df_entire_season['home_points'],
+                                           away_team_array=df_entire_season['away_team'],
+                                           away_score_array=df_entire_season['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           n_simulations=1,
+                                           weighted_mean=weighted_mean)
+        
+        # get home team score
+        predicted_home_score = game_simulation.mean_home_score
+        # get away team score
+        predicted_away_score = game_simulation.mean_away_score
+        
+        # get winning team
+        if predicted_home_score >= predicted_away_score:
+            winning_team_1 = home_team
+        else:
+            winning_team_1 = away_team
+        
+        # 4 vs 5
+        home_team = df_nfc_postseason_teams['team'].iloc[3]
+        away_team = df_nfc_postseason_teams['team'].iloc[4]
+            # simulate game
+        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
+                                           home_score_array=df_entire_season['home_points'],
+                                           away_team_array=df_entire_season['away_team'],
+                                           away_score_array=df_entire_season['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           n_simulations=1,
+                                           weighted_mean=weighted_mean)
+        
+        # get home team score
+        predicted_home_score = game_simulation.mean_home_score
+        # get away team score
+        predicted_away_score = game_simulation.mean_away_score
+        
+        # get winning team
+        if predicted_home_score >= predicted_away_score:
+            winning_team_2 = home_team
+        else:
+            winning_team_2 = away_team
+        
+        # 1 vs winning_team_2
+        home_team = df_nfc_postseason_teams['team'].iloc[0]
+        away_team = winning_team_2
+        # simulate game
+        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
+                                           home_score_array=df_entire_season['home_points'],
+                                           away_team_array=df_entire_season['away_team'],
+                                           away_score_array=df_entire_season['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           n_simulations=1,
+                                           weighted_mean=weighted_mean)
+        
+        # get home team score
+        predicted_home_score = game_simulation.mean_home_score
+        # get away team score
+        predicted_away_score = game_simulation.mean_away_score
+        
+        # get winning team
+        if predicted_home_score >= predicted_away_score:
+            winning_team_3 = home_team
+        else:
+            winning_team_3 = away_team
+        
+        # 2 vs winning_team_1
+        home_team = df_nfc_postseason_teams['team'].iloc[1]
+        away_team = winning_team_1
+        # simulate game
+        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
+                                           home_score_array=df_entire_season['home_points'],
+                                           away_team_array=df_entire_season['away_team'],
+                                           away_score_array=df_entire_season['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           n_simulations=1,
+                                           weighted_mean=weighted_mean)
+        
+        # get home team score
+        predicted_home_score = game_simulation.mean_home_score
+        # get away team score
+        predicted_away_score = game_simulation.mean_away_score
+        
+        # get winning team
+        if predicted_home_score >= predicted_away_score:
+            winning_team_4 = home_team
+        else:
+            winning_team_4 = away_team
+        
+        # winning_team_3 vs winning_team_4
+        # find index of winning_team_3
+        index_winning_team_3 = list(df_nfc_postseason_teams['team']).index(winning_team_3)
+        # find index of winning_team_4
+        index_winning_team_4 = list(df_nfc_postseason_teams['team']).index(winning_team_4)
+        # decide who is home/away based on seed
+        if index_winning_team_3 < index_winning_team_4:
+            home_team = winning_team_3
+            away_team = winning_team_4
+        else:
+            home_team = winning_team_4
+            away_team = winning_team_3
+        # simulate game
+        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
+                                           home_score_array=df_entire_season['home_points'],
+                                           away_team_array=df_entire_season['away_team'],
+                                           away_score_array=df_entire_season['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           n_simulations=1,
+                                           weighted_mean=weighted_mean)
+        
+        # get home team score
+        predicted_home_score = game_simulation.mean_home_score
+        # get away team score
+        predicted_away_score = game_simulation.mean_away_score
+        
+        # get winning team
+        if predicted_home_score >= predicted_away_score:
+            nfc_champs = home_team
+        else:
+            nfc_champs = away_team
+        
+        ########################### continue with afc #################################
+        # get standings for afc
+        df_division_standings = simulated_season.df_AFC_div
+        
+        # instantiate list of divisions
+        list_divisions = ['North','East','South','West']
+        
+        # get division champs
+        list_divsion_champs = []
+        list_division_champ_wins = []
+        for division in list_divisions:
+            # get division champ
+            division_champ = df_division_standings[df_division_standings['Division'] == division]['team'].iloc[0]
+            # append to list
+            list_divsion_champs.append(division_champ)
+            # get wins
+            division_champ_wins = df_division_standings[df_division_standings['Division'] == division]['wins'].iloc[0]
+            # append to list
+            list_division_champ_wins.append(division_champ_wins)
+        
+        # put into df
+        df_postseason_teams = pd.DataFrame({'team': list_divsion_champs,
+                                            'wins': list_division_champ_wins})
+          
+        # sort by wins
+        df_postseason_teams = df_postseason_teams.sort_values(by=['wins'], ascending=False)
+            
+        # put series into lists
+        list_playoff_teams = list(df_postseason_teams['team'])
+        list_playoff_teams_wins = list(df_postseason_teams['wins'])
+        
+        # get the wildcard teams
+        
+        # sort df_NFC_division_standings
+        df_division_standings = df_division_standings.sort_values(by=['wins'], ascending=False)
+        
+        # remove teams in list_divsion_champs
+        df_division_standings_no_champs = df_division_standings[~df_division_standings['team'].isin(list_divsion_champs)]
+        
+        # get the teams and wins for teams with the top 2 records
+        for i in range(0,2):
+            wildcard_team = df_division_standings_no_champs['team'].iloc[i]
+            # append to list
+            list_playoff_teams.append(wildcard_team)
+            # get wins
+            wildcard_team_wins = df_division_standings_no_champs['wins'].iloc[i]
+            # append to list
+            list_playoff_teams_wins.append(wildcard_team_wins)
+        
+        # put into df
+        df_afc_postseason_teams = pd.DataFrame({'team': list_playoff_teams,
+                                                'wins': list_playoff_teams_wins})
+        
+        # wildcard game 1
+        # 3 vs 6
+        home_team = df_afc_postseason_teams['team'].iloc[2]
+        away_team = df_afc_postseason_teams['team'].iloc[5]
+        # simulate game
+        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
+                                           home_score_array=df_entire_season['home_points'],
+                                           away_team_array=df_entire_season['away_team'],
+                                           away_score_array=df_entire_season['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           n_simulations=1,
+                                           weighted_mean=weighted_mean)
+        
+        # get home team score
+        predicted_home_score = game_simulation.mean_home_score
+        # get away team score
+        predicted_away_score = game_simulation.mean_away_score
+        
+        # get winning team
+        if predicted_home_score >= predicted_away_score:
+            winning_team_1 = home_team
+        else:
+            winning_team_1 = away_team
+        
+        # 4 vs 5
+        home_team = df_afc_postseason_teams['team'].iloc[3]
+        away_team = df_afc_postseason_teams['team'].iloc[4]
+        # simulate game
+        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
+                                           home_score_array=df_entire_season['home_points'],
+                                           away_team_array=df_entire_season['away_team'],
+                                           away_score_array=df_entire_season['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           n_simulations=1,
+                                           weighted_mean=weighted_mean)
+        
+        # get home team score
+        predicted_home_score = game_simulation.mean_home_score
+        # get away team score
+        predicted_away_score = game_simulation.mean_away_score
+        
+        # get winning team
+        if predicted_home_score >= predicted_away_score:
+            winning_team_2 = home_team
+        else:
+            winning_team_2 = away_team
+        
+        # 1 vs winning_team_2
+        home_team = df_afc_postseason_teams['team'].iloc[0]
+        away_team = winning_team_2
+        # simulate game
+        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
+                                           home_score_array=df_entire_season['home_points'],
+                                           away_team_array=df_entire_season['away_team'],
+                                           away_score_array=df_entire_season['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           n_simulations=1,
+                                           weighted_mean=weighted_mean)
+        
+        # get home team score
+        predicted_home_score = game_simulation.mean_home_score
+        # get away team score
+        predicted_away_score = game_simulation.mean_away_score
+        
+        # get winning team
+        if predicted_home_score >= predicted_away_score:
+            winning_team_3 = home_team
+        else:
+            winning_team_3 = away_team
+        
+        # 2 vs winning_team_1
+        home_team = df_afc_postseason_teams['team'].iloc[1]
+        away_team = winning_team_1
+        # simulate game
+        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
+                                           home_score_array=df_entire_season['home_points'],
+                                           away_team_array=df_entire_season['away_team'],
+                                           away_score_array=df_entire_season['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           n_simulations=1,
+                                           weighted_mean=weighted_mean)
+        
+        # get home team score
+        predicted_home_score = game_simulation.mean_home_score
+        # get away team score
+        predicted_away_score = game_simulation.mean_away_score
+        
+        # get winning team
+        if predicted_home_score >= predicted_away_score:
+            winning_team_4 = home_team
+        else:
+            winning_team_4 = away_team
+        
+        # winning_team_3 vs winning_team_4
+        # find index of winning_team_3
+        index_winning_team_3 = list(df_afc_postseason_teams['team']).index(winning_team_3)
+        # find index of winning_team_4
+        index_winning_team_4 = list(df_afc_postseason_teams['team']).index(winning_team_4)
+        # decide who is home/away based on seed
+        if index_winning_team_3 < index_winning_team_4:
+            home_team = winning_team_3
+            away_team = winning_team_4
+        else:
+            home_team = winning_team_4
+            away_team = winning_team_3
+        # simulate game
+        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
+                                           home_score_array=df_entire_season['home_points'],
+                                           away_team_array=df_entire_season['away_team'],
+                                           away_score_array=df_entire_season['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           n_simulations=1,
+                                           weighted_mean=weighted_mean)
+        
+        # get home team score
+        predicted_home_score = game_simulation.mean_home_score
+        # get away team score
+        predicted_away_score = game_simulation.mean_away_score
+        
+        # get winning team
+        if predicted_home_score >= predicted_away_score:
+            afc_champs = home_team
+        else:
+            afc_champs = away_team
+        
+        ############################### super bowl ####################################
+        if (year + 1)%2 == 0:
+            home_team = nfc_champs
+            away_team = afc_champs
+        else:
+            home_team = afc_champs
+            away_team = nfc_champs
+        
+        # simulate game
+        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
+                                           home_score_array=df_entire_season['home_points'],
+                                           away_team_array=df_entire_season['away_team'],
+                                           away_score_array=df_entire_season['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           n_simulations=1,
+                                           weighted_mean=weighted_mean)
+        
+        # get home team score
+        predicted_home_score = game_simulation.mean_home_score
+        # get away team score
+        predicted_away_score = game_simulation.mean_away_score
+        
+        # get winning team
+        if predicted_home_score >= predicted_away_score:
+            superbowl_champs = home_team
+        else:
+            superbowl_champs = away_team
+        
+        ###############################################################################
+        # get list of postseason teams
+        list_postseason_teams = list(set(list(df_nfc_postseason_teams['team']) + list(df_afc_postseason_teams['team'])))
+        # get list of superbowl teams
+        list_superbowl_teams = [afc_champs, nfc_champs]
+        
+        ###############################################################################
+        # mark if a team made postseason
+        df_teams_postseason['sim_{0}'.format(x)] = df_teams_postseason.apply(lambda x: 1 if x['team'] in list_postseason_teams else 0, axis=1)
+        # mark if team was a conference champion
+        df_teams_conference_champs['sim_{0}'.format(x)] = df_teams_conference_champs.apply(lambda x: 1 if x['team'] in list_superbowl_teams else 0, axis=1)
+        # mark if team won superbowl
+        df_teams_superbowl_champs['sim_{0}'.format(x)] = df_teams_superbowl_champs.apply(lambda x: 1 if x['team'] == superbowl_champs else 0, axis=1)
+    
+    # get the probability of each
+    # postseason
+    df_teams_postseason['prob_postseason'] = df_teams_postseason.mean(axis=1)
+    # conference champs
+    df_teams_conference_champs['prob_conf_champ'] = df_teams_conference_champs.mean(axis=1)
+    # superboal chanmps
+    df_teams_superbowl_champs['prob_superbowl_champ'] = df_teams_superbowl_champs.mean(axis=1)
+    
+    # put all probability cols into the same df
+    df = pd.DataFrame({'team': list_teams,
+                       'prob_postseason': df_teams_postseason['prob_postseason'],
+                       'prob_conf_champ': df_teams_conference_champs['prob_conf_champ'],
+                       'prob_superbowl_champ': df_teams_superbowl_champs['prob_superbowl_champ']})
+    return df
 
 
 
