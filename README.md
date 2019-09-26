@@ -19,7 +19,9 @@ Example:
 from nfl_predictions import nfl_pickem
 
 # simulate upcoming week
-upcoming_week_simulation = nfl_pickem(year=2019, weighted_mean=False, n_simulations=1000)
+upcoming_week_simulation = nfl_pickem(year=2019, 
+                                      weighted_mean=False, 
+                                      n_simulations=1000)
 
 # view results
 upcoming_week_simulation
@@ -48,7 +50,9 @@ Example:
 from nfl_predictions import nfl_season_simulation
 
 # simulate season
-simulated_season = nfl_season_simulation(year=2019, weighted_mean=False, n_simulations=1000)
+simulated_season = nfl_season_simulation(year=2019, 
+                                         weighted_mean=False, 
+                                         n_simulations=1000)
 
 # get simulated season
 df_entire_season = simulated_season.df_simulated_season
@@ -86,7 +90,9 @@ Example:
 from nfl_predictions import nfl_postseason_probabilities
 
 # get probabilities
-df_postseason_probabilities = nfl_postseason_probabilities(year=2019, n_simulations=100, weighted_mean=False)
+df_postseason_probabilities = nfl_postseason_probabilities(year=2019, 
+                                                           n_simulations=100, 
+                                                           weighted_mean=False)
 ```
 
 ---
