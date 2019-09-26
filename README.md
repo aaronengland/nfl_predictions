@@ -81,6 +81,7 @@ Arguments:
 - `year`: season to simulate.
 - `n_simulations`: number of seasons to simulate.
 - `weighted_mean`: use of weighted mean in simulation (boolean; default=False; False is recommended for early in the season while True is recommended for later games).
+- `weighted_mean_super_bowl`: use of weighted mean in simulation of super bowl (boolean; default=True).
 
 Returns a data frame with columns for probability of postseason, conference champion, and super bowl champion.
 
@@ -92,7 +93,8 @@ from nfl_predictions import nfl_postseason_probabilities
 # get probabilities
 df_postseason_probabilities = nfl_postseason_probabilities(year=2019, 
                                                            n_simulations=100, 
-                                                           weighted_mean=False)
+                                                           weighted_mean=False,
+                                                           weighted_mean_super_bowl=True)
 ```
 
 ---
