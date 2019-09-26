@@ -366,7 +366,7 @@ def nfl_season_simulation(year, weighted_mean=False, n_simulations=1000):
     return x
 
 # define function for postseason probabilities
-def nfl_postseason_probabilities(year, n_simulations, weighted_mean=False):
+def nfl_postseason_probabilities(year, n_simulations, weighted_mean=False, weighted_mean_super_bowl=True):
     # get the unique teams
     list_teams = list(pd.read_csv('https://raw.githubusercontent.com/aaronengland/data/master/nfl_teams_conferences.csv')['Name'])
     # make data frame with just teams for postseason
@@ -566,27 +566,53 @@ def nfl_postseason_probabilities(year, n_simulations, weighted_mean=False):
             list_conference_champs.append(conference_champs)
             
         ############################### super bowl ####################################
-        if (year + 1)%2 == 0:
-            home_team = list_conference_champs[0]
-            away_team = list_conference_champs[1]
+        # for super bowl we dont want to separate games by home/away so we will change the function a little
+        # make sure final_afc_points and final_nfc_points are equal
+        final_afc_points = 0
+        final_nfc_points = 0
+        while final_afc_points == final_nfc_points:
+            # instantiate lists
+            list_pred_points_target = []
+            list_pred_points_opp_target = []
+            # iterate through home and away teams
+            for conference_champs in list_conference_champs:
+                # subset to all games involving the conference_champs
+                df_target_scores = df_entire_season[(df_entire_season['home_team'] == conference_champs) | (df_entire_season['away_team'] == conference_champs)]
+                # get home scores only
+                df_target_scores['target_points_only'] = df_target_scores.apply(lambda x: x['home_points'] if x['home_team'] == conference_champs else x['away_points'], axis=1)
+                # get home opponents scores only
+                df_target_scores['target_opp_points_only'] = df_target_scores.apply(lambda x: x['away_points'] if x['home_team'] == conference_champs else x['home_points'], axis=1)
+                # calculate mean points scored by home team
+                if weighted_mean_super_bowl==True:
+                    # get mean points scored by heom_team
+                    mean_points_target = np.average(df_target_scores['target_points_only'], weights=[x for x in range(1, df_target_scores.shape[0]+1)])
+                else:
+                    mean_points_target = np.mean(df_target_scores['target_points_only'])
+                # generate a random number from a poisson distribution with this number as the lambda
+                pred_points_target = np.random.poisson(mean_points_target, 1)[0]
+                # append to list_pred_points_target
+                list_pred_points_target.append(pred_points_target)
+                
+                # calculate mean points allowed by home team
+                if weighted_mean_super_bowl==True:
+                    # get mean points scored by heom_team
+                    mean_opp_points_target = np.average(df_target_scores['target_opp_points_only'], weights=[x for x in range(1, df_target_scores.shape[0]+1)])
+                else:
+                    mean_opp_points_target = np.mean(df_target_scores['target_opp_points_only'])
+                # generate a random number from a poisson distribution with this number as the lambda
+                pred_points_opp_target = np.random.poisson(mean_opp_points_target, 1)[0]
+                # append to list_pred_points_opp_target
+                list_pred_points_opp_target.append(pred_points_opp_target)
+            
+            # calculate predicted points scored for each team in list_conference_champs
+            final_afc_points = (list_pred_points_target[0] + list_pred_points_opp_target[1]) / 2
+            final_nfc_points = (list_pred_points_target[1] + list_pred_points_opp_target[0]) / 2
+        
+        # get super bowl champ
+        if final_afc_points > final_nfc_points:
+            superbowl_champs = list_conference_champs[0]
         else:
-            home_team = list_conference_champs[1]
-            away_team = list_conference_champs[0]
-        
-        # simulate game
-        game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
-                                           home_score_array=df_entire_season['home_points'],
-                                           away_team_array=df_entire_season['away_team'],
-                                           away_score_array=df_entire_season['away_points'],
-                                           home_team=home_team,
-                                           away_team=away_team,
-                                           n_simulations=1,
-                                           weighted_mean=weighted_mean)
-        
-        # get winner
-        superbowl_champs = who_won(predicted_home_score=game_simulation.mean_home_score, 
-                                   predicted_away_score=game_simulation.mean_away_score, 
-                                   home_team=home_team, away_team=home_team)
+            superbowl_champs = list_conference_champs[1]
                 
         ###############################################################################
         # mark if a team made postseason
