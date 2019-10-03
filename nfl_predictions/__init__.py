@@ -367,6 +367,8 @@ def nfl_season_simulation(year, weighted_mean=False, n_simulations=1000):
 
 # define function for postseason probabilities
 def nfl_postseason_probabilities(year, n_simulations, weighted_mean=False, weighted_mean_super_bowl=True):
+    # suppress the SettingWithCopyWarning
+    pd.options.mode.chained_assignment = None
     # get the unique teams
     list_teams = list(pd.read_csv('https://raw.githubusercontent.com/aaronengland/data/master/nfl_teams_conferences.csv')['Name'])
     # make data frame with just teams for postseason
