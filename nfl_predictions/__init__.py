@@ -156,6 +156,8 @@ def nfl_pickem(year, weighted_mean=False, n_simulations=1000):
 
 # define function for nfl_season_simulation
 def nfl_season_simulation(year, weighted_mean=False, n_simulations=1000):
+    # suppress the SettingWithCopyWarning
+    pd.options.mode.chained_assignment = None
     # get url
     r = requests.get('https://www.pro-football-reference.com/years/2019/games.htm'.format(year))
     # get content of page
