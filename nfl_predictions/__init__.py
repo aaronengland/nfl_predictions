@@ -102,7 +102,15 @@ def scrape_schedule(year):
     return df
 
 # define function to tune model parameters
-def tune_hyperparameters(list_outer_weighted_mean, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away):
+def tune_hyperparameters(df, week_to_simulate, list_outer_weighted_mean, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away):
+    # we will tune our model on one week before week_to_simulate
+    week_to_simulate_train = week_to_simulate - 1
+
+    # drop everything after week X
+    df_data = df[df['week'] < week_to_simulate_train]
+    # get the games to simulate
+    df_predictions = df[df['week'] == week_to_simulate_train]
+    
     # time to tune model
     time_start = datetime.datetime.now()
     # instantiate empty list
