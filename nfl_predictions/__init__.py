@@ -4,6 +4,108 @@ import pandas as pd
 import numpy as np
 from game_predictions import game_predictions
 
+# define function for scraping nfl schedule/results
+def scrape_schedule(year):
+    # get url
+    r = requests.get('https://www.pro-football-reference.com/years/{0}/games.htm'.format(year))
+    # get content of page
+    soup = BeautifulSoup(r.content, 'html.parser')
+    # get all table rows
+    table_rows = soup.find_all('tr')
+    # instantiate empty lists
+    list_week = []
+    list_winning_team = []
+    list_game_location = []
+    list_losing_team = []
+    list_winning_team_points = []
+    list_losing_team_points = []
+    # for each row
+    for i in range(1, len(table_rows)):
+        # get a row
+        row = soup.find_all('tr')[i]
+        # get all td elements
+        td = row.find_all('td')
+        # if td is not an empty list
+        if td:
+            # get week
+            week = int(row.find('th').text)
+            list_week.append(week)
+            # get winning team
+            winning_team = td[3].find('a').text
+            list_winning_team.append(winning_team)
+            # get game location
+            game_location = td[4].text
+            list_game_location.append(game_location)
+            # get losing team
+            losing_team = td[5].find('a').text
+            list_losing_team.append(losing_team)
+            # get winning team points
+            winning_team_points = td[7].text
+            list_winning_team_points.append(winning_team_points)
+            # get losing team points
+            losing_team_points = td[8].text
+            list_losing_team_points.append(losing_team_points)
+    
+    # put into df
+    df = pd.DataFrame({'week': list_week,
+                       'winning_team': list_winning_team,
+                       'game_loc': list_game_location,
+                       'losing_team': list_losing_team,
+                       'winning_team_points': list_winning_team_points,
+                       'losing_team_points': list_losing_team_points})
+        
+    # convert week and points to integer
+    df['winning_team_points'] = df.apply(lambda x: int(x['winning_team_points']) if x['winning_team_points'] != '' else np.nan, axis=1)
+    df['losing_team_points'] = df.apply(lambda x: int(x['losing_team_points']) if x['losing_team_points'] != '' else np.nan, axis=1)
+        
+    # get the data into a form we can do something with
+    # get home and away teams
+    list_home_team = []
+    list_away_team = []
+    # get home and away scores
+    list_home_points = []
+    list_away_points = []
+    # iterate through all rows
+    for i in range(df.shape[0]):
+        if df['game_loc'].iloc[i] == '@':
+            # get teams
+            home_team = df['losing_team'].iloc[i]
+            away_team = df['winning_team'].iloc[i]
+            # get points
+            home_points = df['losing_team_points'].iloc[i]
+            away_points = df['winning_team_points'].iloc[i]
+        else:
+            # get teams
+            home_team = df['winning_team'].iloc[i]
+            away_team = df['losing_team'].iloc[i]
+            # get points
+            home_points = df['winning_team_points'].iloc[i]
+            away_points = df['losing_team_points'].iloc[i]
+        # append to lists
+        # teams
+        list_home_team.append(home_team)
+        list_away_team.append(away_team)
+        # points
+        list_home_points.append(home_points)
+        list_away_points.append(away_points)
+        
+    # put into df
+    df = pd.DataFrame({'week': df['week'],
+                       'home_team': list_home_team,
+                       'away_team': list_away_team,
+                       'home_points': list_home_points,
+                       'away_points': list_away_points}) 
+        
+    # get winning team
+    df['winning_team'] = df.apply(lambda x: x['home_team'] if x['home_points'] > x['away_points'] else x['away_team'], axis=1)
+    # return df
+    return df
+
+
+
+
+
+
 # define function for upcoming week predictions
 def nfl_pickem(year, weighted_mean=False, n_simulations=1000):
     # get url
