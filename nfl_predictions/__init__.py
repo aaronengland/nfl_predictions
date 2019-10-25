@@ -103,7 +103,7 @@ def scrape_schedule(year):
     return df
 
 # define function to tune model parameters
-def tune_hyperparameters(df, week_to_simulate, list_outer_weighted_mean, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away):
+def tune_hyperparameters(df, week_to_simulate, list_outer_weighted_mean, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away, n_simulations=1000):
     # we will tune our model on one week before week_to_simulate
     week_to_simulate_train = week_to_simulate - 1
 
