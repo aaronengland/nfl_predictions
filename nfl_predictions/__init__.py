@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
 from game_predictions import game_predictions
+import datetime
 
 # define function for scraping nfl schedule/results
 def scrape_schedule(year):
