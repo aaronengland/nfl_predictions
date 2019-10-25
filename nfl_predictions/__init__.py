@@ -239,157 +239,47 @@ def tune_hyperparameters(df, week_to_simulate, list_outer_weighted_mean, list_di
     # return dict_results
     return dict_results
 
+# define function to simulate current week's games
+# simulate current week'as games
+def simulate_current_week(df, week_to_simulate, dict_best_hyperparameters, n_simulations):
+    # drop everything after week X
+    df_data = df[df['week'] < week_to_simulate]
+    # get the games to simulate
+    df_predictions = df[df['week'] == week_to_simulate]
+    
+    # generate my predictions
+    df_predictions['pred_outcome'] = df_predictions.apply(lambda x: game_predictions(home_team_array=df_data['home_team'], 
+                                                                                     home_score_array=df_data['home_points'], 
+                                                                                     away_team_array=df_data['away_team'], 
+                                                                                     away_score_array=df_data['away_points'], 
+                                                                                     home_team=x['home_team'], 
+                                                                                     away_team=x['away_team'], 
+                                                                                     outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'), 
+                                                                                     distribution=dict_best_hyperparameters.get('distribution'),
+                                                                                     inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'), 
+                                                                                     weight_home=dict_best_hyperparameters.get('weight_home'),
+                                                                                     weight_away=dict_best_hyperparameters.get('weight_away'),
+                                                                                     n_simulations=n_simulations), axis=1)
+    # drop the winning_team column
+    df_predictions.drop(columns=['winning_team'], inplace=True, axis=1)
+    
+    # make a table we can copy and paste into our index.html
+    for key in df_predictions['pred_outcome'].iloc[0]:
+        df_predictions[key] = df_predictions.apply(lambda x: x['pred_outcome'].get(key), axis=1)
+    
+    # drop cols
+    df_predictions.drop(['home_points','away_points','pred_outcome'], inplace=True, axis=1)
+    
+    # rename the cols
+    df_predictions.columns = ['Week','Home','Away','Home Points','Away Points','Home Win Probability','Winning Team']
+    
+    # return df_predictions
+    return df_predictions
 
 
 
-# define function for upcoming week predictions
-def nfl_pickem(year, weighted_mean=False, n_simulations=1000):
-    # get url
-    r = requests.get('https://www.pro-football-reference.com/years/{0}/games.htm'.format(year))
-    # get content of page
-    soup = BeautifulSoup(r.content, 'html.parser')
-    # get all table rows
-    table_rows = soup.find_all('tr')
-    # instantiate empty lists
-    list_week = []
-    list_winning_team = []
-    list_game_location = []
-    list_losing_team = []
-    list_winning_team_points = []
-    list_losing_team_points = []
-    # for each row
-    for i in range(1, len(table_rows)):
-        # get a row
-        row = soup.find_all('tr')[i]
-        # get all td elements
-        td = row.find_all('td')
-        # if td is not an empty list
-        if td:
-            # get week
-            week = int(row.find('th').text)
-            list_week.append(week)
-            # get winning team
-            winning_team = td[3].find('a').text
-            list_winning_team.append(winning_team)
-            # get game location
-            game_location = td[4].text
-            list_game_location.append(game_location)
-            # get losing team
-            losing_team = td[5].find('a').text
-            list_losing_team.append(losing_team)
-            # get winning team points
-            winning_team_points = td[7].text
-            list_winning_team_points.append(winning_team_points)
-            # get losing team points
-            losing_team_points = td[8].text
-            list_losing_team_points.append(losing_team_points)
-    
-    # put into df
-    df = pd.DataFrame({'week': list_week,
-                       'winning_team': list_winning_team,
-                       'game_loc': list_game_location,
-                       'losing_team': list_losing_team,
-                       'winning_team_points': list_winning_team_points,
-                       'losing_team_points': list_losing_team_points})
-    
-    # convert week and points to integer
-    df['winning_team_points'] = df.apply(lambda x: int(x['winning_team_points']) if x['winning_team_points'] != '' else np.nan, axis=1)
-    df['losing_team_points'] = df.apply(lambda x: int(x['losing_team_points']) if x['losing_team_points'] != '' else np.nan, axis=1)
-    
-    # get the data into a form we can do something with
-    
-    # get home and away teams
-    list_home_team = []
-    list_away_team = []
-    # get home and away scores
-    list_home_points = []
-    list_away_points = []
-    # iterate through all rows
-    for i in range(df.shape[0]):
-        if df['game_loc'].iloc[i] == '@':
-            # get teams
-            home_team = df['losing_team'].iloc[i]
-            away_team = df['winning_team'].iloc[i]
-            # get points
-            home_points = df['losing_team_points'].iloc[i]
-            away_points = df['winning_team_points'].iloc[i]
-        else:
-            # get teams
-            home_team = df['winning_team'].iloc[i]
-            away_team = df['losing_team'].iloc[i]
-            # get points
-            home_points = df['winning_team_points'].iloc[i]
-            away_points = df['losing_team_points'].iloc[i]
-        # append to lists
-        # teams
-        list_home_team.append(home_team)
-        list_away_team.append(away_team)
-        # points
-        list_home_points.append(home_points)
-        list_away_points.append(away_points)
-    
-    # put into df
-    df = pd.DataFrame({'week': df['week'],
-                       'home_team': list_home_team,
-                       'away_team': list_away_team,
-                       'home_points': list_home_points,
-                       'away_points': list_away_points})  
-    
-    # get games for the upcoming week
-    upcoming_week = np.min(df[df.isnull().any(axis=1)]['week'])  
-    
-    # get the matchups for the upcoming week
-    df_upcoming_week = df[df['week'] == upcoming_week]
-    
-    # drop rows with missing values
-    df = df.dropna(subset=['home_points'])
-    
-    # instantiate lists
-    list_home_score = []
-    list_away_score = []
-    list_home_win_prob = []
-    for i in range(df_upcoming_week.shape[0]):
-        # get home_team
-        home_team = df_upcoming_week['home_team'].iloc[i]
-        # get away_team
-        away_team = df_upcoming_week['away_team'].iloc[i]
-    
-        # check to make sure each team is in the respective lists
-        if home_team in list(df['home_team']) and away_team in list(df['away_team']):
-            # simulate game
-            simulated_game = game_predictions(home_team_array=df['home_team'], 
-                                              home_score_array=df['home_points'], 
-                                              away_team_array=df['away_team'], 
-                                              away_score_array=df['away_points'], 
-                                              home_team=home_team, 
-                                              away_team=away_team,
-                                              n_simulations=n_simulations,
-                                              weighted_mean=weighted_mean)
-            # get the predicted home score
-            home_score = simulated_game.mean_home_score
-            # get the predicted away score
-            away_score = simulated_game.mean_away_score
-            # get the predicted win probability
-            home_win_prob = simulated_game.prop_home_win
-        else:
-            home_score = 'NA'
-            away_score = 'NA'
-            home_win_prob = 'NA'
-        # append to lists
-        list_home_score.append(home_score)
-        list_away_score.append(away_score)
-        list_home_win_prob.append(home_win_prob)
-        
-    # put into df
-    df_upcoming_week['home_points'] = list_home_score
-    df_upcoming_week['away_points'] = list_away_score
-    df_upcoming_week['home_win_prob'] = list_home_win_prob
-    
-    # choose the winning team
-    df_upcoming_week['winning_team'] = df_upcoming_week.apply(lambda x: x['home_team'] if x['home_points'] >= x['away_points'] else x['away_team'], axis=1)
-    
-    # return df_upcoming_week
-    return df_upcoming_week
+
+
 
 
 # define function for nfl_season_simulation
