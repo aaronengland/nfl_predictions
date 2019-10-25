@@ -233,7 +233,7 @@ def tune_hyperparameters(df, week_to_simulate, list_outer_weighted_mean, list_di
     dict_best_hyperparameters = df_outcomes_sorted['hyperparameters'].iloc[0]
     
     # make a dictionary with output
-    dict_results = {'df_outcomes': df_outcomes,
+    dict_results = {'df_outcomes_sorted': df_outcomes_sorted,
                     'dict_best_hyperparameters': dict_best_hyperparameters}
     
     # return dict_results
