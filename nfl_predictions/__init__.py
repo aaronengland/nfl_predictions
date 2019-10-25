@@ -101,7 +101,134 @@ def scrape_schedule(year):
     # return df
     return df
 
-
+# define function to tune model parameters
+def tune_hyperparameters(list_outer_weighted_mean, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away):
+    # time to tune model
+    time_start = datetime.datetime.now()
+    # instantiate empty list
+    list_sum_correct = []
+    list_sum_error = []
+    list_dict_outcomes = []
+    for outer_weighted_mean in list_outer_weighted_mean:
+        # if all_games_weighted
+        if outer_weighted_mean == 'all_games_weighted':
+            for distribution in list_distributions:
+                for weight_home in list_weight_home:
+                    for weight_away in list_weight_away:
+                        # we only want equal weights when both equal 1
+                        if (weight_home + weight_away == 2) or (weight_home != weight_away):
+                            for inner_weighted_mean in list_inner_weighted_mean:
+                                # predict every game in df_predictions
+                                df_predictions['pred_outcome'] = df_predictions.apply(lambda x: game_predictions(home_team_array=df_data['home_team'], 
+                                                                                                                 home_score_array=df_data['home_points'], 
+                                                                                                                 away_team_array=df_data['away_team'], 
+                                                                                                                 away_score_array=df_data['away_points'], 
+                                                                                                                 home_team=x['home_team'], 
+                                                                                                                 away_team=x['away_team'], 
+                                                                                                                 outer_weighted_mean=outer_weighted_mean, 
+                                                                                                                 inner_weighted_mean=inner_weighted_mean, 
+                                                                                                                 weight_home=weight_home,
+                                                                                                                 weight_away=weight_away,
+                                                                                                                 n_simulations=n_simulations), axis=1)
+                
+                                # get winning team
+                                df_predictions['pred_winning_team'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('winning_team'), axis=1)
+                                # get number right
+                                sum_correct = np.sum(df_predictions.apply(lambda x: 1 if x['winning_team'] == x['pred_winning_team'] else 0, axis=1))
+                                # append to list
+                                list_sum_correct.append(sum_correct)
+                                
+                                # get the total spread difference so we can sort by that as well
+                                # get predicted home points
+                                df_predictions['pred_home_points'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('mean_home_pts'), axis=1)
+                                # get predicted away points
+                                df_predictions['pred_away_points'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('mean_away_pts'), axis=1)
+                                # get absolute difference between home_points and pred_home_points
+                                df_predictions['pred_home_points_error'] = df_predictions.apply(lambda x: np.abs(x['home_points'] - x['pred_home_points']), axis=1)
+                                # get absolute difference between away_points and pred_away_points
+                                df_predictions['pred_away_points_error'] = df_predictions.apply(lambda x: np.abs(x['away_points'] - x['pred_away_points']), axis=1)
+                                # sum pred_home_points_error and pred_away_points_error
+                                sum_error = np.sum(df_predictions['pred_home_points_error']) + np.sum(df_predictions['pred_away_points_error'])
+                                # append to list
+                                list_sum_error.append(sum_error)
+                                
+                                # create dictionary
+                                dict_outcomes = {'outer_weighted_mean': outer_weighted_mean,
+                                                 'distribution': distribution,
+                                                 'weight_home': weight_home,
+                                                 'weight_away': weight_away,
+                                                 'inner_weighted_mean': inner_weighted_mean}
+                                # append to list
+                                list_dict_outcomes.append(dict_outcomes)
+        # else (i.e., outer_weighted_mean != 'all_games_weighted')
+        else:
+            for distribution in list_distributions:
+                # save weight home and weight away for the dictionary
+                weight_home = None
+                weight_away = None
+                for inner_weighted_mean in list_inner_weighted_mean:
+                    # predict every game in df_predictions
+                    df_predictions['pred_outcome'] = df_predictions.apply(lambda x: game_predictions(home_team_array=df_data['home_team'], 
+                                                                                                     home_score_array=df_data['home_points'], 
+                                                                                                     away_team_array=df_data['away_team'], 
+                                                                                                     away_score_array=df_data['away_points'], 
+                                                                                                     home_team=x['home_team'], 
+                                                                                                     away_team=x['away_team'], 
+                                                                                                     outer_weighted_mean=outer_weighted_mean, 
+                                                                                                     inner_weighted_mean=inner_weighted_mean, 
+                                                                                                     n_simulations=n_simulations), axis=1)
+            
+                    # get winning team
+                    df_predictions['pred_winning_team'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('winning_team'), axis=1)
+                    # get number right
+                    sum_correct = np.sum(df_predictions.apply(lambda x: 1 if x['winning_team'] == x['pred_winning_team'] else 0, axis=1))
+                    # append to list
+                    list_sum_correct.append(sum_correct)
+                    
+                    # get the total spread difference so we can sort by that as well
+                    # get predicted home points
+                    df_predictions['pred_home_points'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('mean_home_pts'), axis=1)
+                    # get predicted away points
+                    df_predictions['pred_away_points'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('mean_away_pts'), axis=1)
+                    # get absolute difference between home_points and pred_home_points
+                    df_predictions['pred_home_points_error'] = df_predictions.apply(lambda x: np.abs(x['home_points'] - x['pred_home_points']), axis=1)
+                    # get absolute difference between away_points and pred_away_points
+                    df_predictions['pred_away_points_error'] = df_predictions.apply(lambda x: np.abs(x['away_points'] - x['pred_away_points']), axis=1)
+                    # sum pred_home_points_error and pred_away_points_error
+                    sum_error = np.sum(df_predictions['pred_home_points_error']) + np.sum(df_predictions['pred_away_points_error'])
+                    # append to list
+                    list_sum_error.append(sum_error)
+                    
+                    # create dictionary
+                    dict_outcomes = {'outer_weighted_mean': outer_weighted_mean,
+                                     'distribution': distribution,
+                                     'weight_home': weight_home,
+                                     'weight_away': weight_away,
+                                     'inner_weighted_mean': inner_weighted_mean}
+                    # append to list
+                    list_dict_outcomes.append(dict_outcomes)
+    # get elapsed time
+    elapsed_time = (datetime.datetime.now() - time_start).seconds
+    # print message
+    print('Time to tune the model: {0} min'.format(elapsed_time/60))
+    
+    # put outcome lists into a df
+    df_outcomes = pd.DataFrame({'hyperparameters': list_dict_outcomes,
+                                'n_correct': list_sum_correct,
+                                'error': list_sum_error})
+    
+    # sort values descending
+    df_outcomes_sorted = df_outcomes.sort_values(by=['n_correct','error'], ascending=[False, True])
+    
+    # get the best set of hyperparameters
+    dict_best_hyperparameters = df_outcomes_sorted['hyperparameters'].iloc[0]
+    
+    # make a dictionary with output
+    dict_results = {'df_outcomes': df_outcomes,
+                    'dict_best_hyperparameters': dict_best_hyperparameters}
+    
+    # return dict_results
+    return dict_results
 
 
 
