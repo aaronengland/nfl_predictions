@@ -34,10 +34,10 @@ Returns a dictionary containing a data frame of hyperparameter combinations and 
 ## simulate_current_week
 
 Arguments:
-- `df`:
-- `week_to_simulate`:
-- `dict_best_hyperparameters`:
-- `n_simulations`:
+- `df`: data frame produced from the `scrape_schedule` function.
+- `week_to_simulate`: the week in which to simulate.
+- `dict_best_hyperparameters`: dictionary containing the best hyperparameters (returned from `tune_hyperparameters`).
+- `n_simulations`: number of simulations for each contest.
 
 Returns a data frame containing: `Week`, `Home`, `Away`, `Home Points`, `Away Points`, `Home Win Probability`, and `Winning Team`.
 
@@ -46,9 +46,9 @@ Returns a data frame containing: `Week`, `Home`, `Away`, `Home Points`, `Away Po
 ## nfl_season_simulation
 
 Arguments:
-- `df`:
-- `dict_best_hyperparameters`:
-- `n_simulations`:
+- `df`: data frame produced from the `scrape_schedule` function.
+- `dict_best_hyperparameters`: dictionary containing the best hyperparameters (returned from `tune_hyperparameters`).
+- `n_simulations`: number of simulations for each contest.
 
 Returns a data frame of the entire season's matchups with the actual scores of the games that have been played and the predicted scores of the games that have not been played.
 
@@ -57,9 +57,9 @@ Returns a data frame of the entire season's matchups with the actual scores of t
 ## nfl_postseason_probabilities
 
 Arguments:
-- `df`: data frame 
-- `dict_best_hyperparameters`:
-- `n_simulations`:
+- `df`: data frame produced from the `scrape_schedule` function.
+- `dict_best_hyperparameters`: dictionary containing the best hyperparameters (returned from `tune_hyperparameters`).
+- `n_simulations`: number of simulations for each contest.
 
 Returns a data frame containing `team`, `prob_postseason` (probability of postseason), `prob_conf_champs` (probability of winning the conference), and `prob_superbowl_champ` (probability of winning the superbowl).
 
