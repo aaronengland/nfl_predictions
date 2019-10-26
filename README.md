@@ -1,6 +1,6 @@
 # nfl_predictions
 
-A package for scraping the user-defined NFL season's schedule/results from [here](https://www.pro-football-reference.com/) (`scrape_schedule`), simulate the current week (`simulate_current_week`) and season (`nfl_season_simulation`), and generate postseason probabilities (`nfl_postseason_probabilities`) using the [`game_predictions`](https://github.com/aaronengland/game_predictions/blob/master/README.md) algorithm.
+A package for scraping the user-defined NFL season's schedule/results from [here](https://www.pro-football-reference.com/) (`scrape_schedule`), tune the model's hyperparameters on the previous week (`tune_hyperparameters`), simulate the current week (`simulate_current_week`) and season (`nfl_season_simulation`), and generate postseason probabilities (`nfl_postseason_probabilities`) using the [`game_predictions`](https://github.com/aaronengland/game_predictions/blob/master/README.md) algorithm.
 
 To install, use: `pip install git+https://github.com/aaronengland/nfl_predictions.git`
 
