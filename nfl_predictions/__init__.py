@@ -363,7 +363,7 @@ def nfl_season_simulation(df, dict_best_hyperparameters, n_simulations=1000):
     return results
 
 # define function for postseason probabilities
-def nfl_postseason_probabilities(year, n_simulations, weighted_mean=False, weighted_mean_super_bowl=True):
+def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
     # suppress the SettingWithCopyWarning
     pd.options.mode.chained_assignment = None
     # get the unique teams
@@ -378,16 +378,17 @@ def nfl_postseason_probabilities(year, n_simulations, weighted_mean=False, weigh
     # user defined number of simulations
     for x in range(n_simulations):
         # simulate season
-        simulated_season = nfl_season_simulation(year=year, weighted_mean=False, n_simulations=1)
+        simulated_season = nfl_season_simulation(df=df, 
+                                                 dict_best_hyperparameters=dict_best_hyperparameters,
+                                                 n_simulations=1)
         # get the simulated season to help with playoff predictions later
-        df_entire_season = simulated_season.df_simulated_season
+        #df_entire_season = simulated_season.get('final_win_predictions_conf')
         
-        #######################################################################
         # get division standings for each conference
         # nfc
-        df_nfc_division_standings = simulated_season.df_NFC_div
+        df_nfc_division_standings = simulated_season.get('nfc_div')
         # afc
-        df_afc_division_standings = simulated_season.df_AFC_div
+        df_afc_division_standings = simulated_season.get('afc_div')
         
         # put both into a list so we can loop through them
         list_df_conference_division_standings = [df_nfc_division_standings, df_afc_division_standings]
@@ -451,88 +452,86 @@ def nfl_postseason_probabilities(year, n_simulations, weighted_mean=False, weigh
             
             ###################################################################
             # begin game simulations
-            # define helper function to pick winners faster
-            def who_won(predicted_home_score, predicted_away_score, home_team, away_team):
-                # get winning team
-                if predicted_home_score >= predicted_away_score:
-                    winning_team = home_team
-                else:
-                    winning_team = away_team
-                return winning_team
-            
             # wildcard game 1
             # 3 vs 6
             home_team = df_postseason_teams['team'].iloc[2]
             away_team = df_postseason_teams['team'].iloc[5]
+            
+            # get the games thathave been played
+            df_played = df.dropna(subset=['home_points'])
+            
             # simulate game
-            game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
-                                               home_score_array=df_entire_season['home_points'],
-                                               away_team_array=df_entire_season['away_team'],
-                                               away_score_array=df_entire_season['away_points'],
+            game_simulation = game_predictions(home_team_array=df_played['home_team'],
+                                               home_score_array=df_played['home_points'],
+                                               away_team_array=df_played['away_team'],
+                                               away_score_array=df_played['away_points'],
                                                home_team=home_team,
                                                away_team=away_team,
-                                               n_simulations=1,
-                                               weighted_mean=weighted_mean)
+                                               outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                               inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
+                                               weight_home=dict_best_hyperparameters.get('weight_home'),
+                                               weight_away=dict_best_hyperparameters.get('weight_away'),
+                                               n_simulations=1)
         
             # get winner
-            winning_team_1 = who_won(predicted_home_score=game_simulation.mean_home_score, 
-                                     predicted_away_score=game_simulation.mean_away_score, 
-                                     home_team=home_team, away_team=home_team)
+            winning_team_1 = game_simulation.get('winning_team')
         
             # 4 vs 5
             home_team = df_postseason_teams['team'].iloc[3]
             away_team = df_postseason_teams['team'].iloc[4]
                 # simulate game
-            game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
-                                               home_score_array=df_entire_season['home_points'],
-                                               away_team_array=df_entire_season['away_team'],
-                                               away_score_array=df_entire_season['away_points'],
+            game_simulation = game_predictions(home_team_array=df_played['home_team'],
+                                               home_score_array=df_played['home_points'],
+                                               away_team_array=df_played['away_team'],
+                                               away_score_array=df_played['away_points'],
                                                home_team=home_team,
                                                away_team=away_team,
-                                               n_simulations=1,
-                                               weighted_mean=weighted_mean)
+                                               outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                               inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
+                                               weight_home=dict_best_hyperparameters.get('weight_home'),
+                                               weight_away=dict_best_hyperparameters.get('weight_away'),
+                                               n_simulations=1)
         
             # get winner
-            winning_team_2 = who_won(predicted_home_score=game_simulation.mean_home_score, 
-                                     predicted_away_score=game_simulation.mean_away_score, 
-                                     home_team=home_team, away_team=home_team)
+            winning_team_2 = game_simulation.get('winning_team')
         
             # 1 vs winning_team_2
             home_team = df_postseason_teams['team'].iloc[0]
             away_team = winning_team_2
             # simulate game
-            game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
-                                               home_score_array=df_entire_season['home_points'],
-                                               away_team_array=df_entire_season['away_team'],
-                                               away_score_array=df_entire_season['away_points'],
+            game_simulation = game_predictions(home_team_array=df_played['home_team'],
+                                               home_score_array=df_played['home_points'],
+                                               away_team_array=df_played['away_team'],
+                                               away_score_array=df_played['away_points'],
                                                home_team=home_team,
                                                away_team=away_team,
-                                               n_simulations=1,
-                                               weighted_mean=weighted_mean)
+                                               outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                               inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
+                                               weight_home=dict_best_hyperparameters.get('weight_home'),
+                                               weight_away=dict_best_hyperparameters.get('weight_away'),
+                                               n_simulations=1)
             
             # get winner
-            winning_team_3 = who_won(predicted_home_score=game_simulation.mean_home_score, 
-                                     predicted_away_score=game_simulation.mean_away_score, 
-                                     home_team=home_team, away_team=home_team)
-        
+            winning_team_3 = game_simulation.get('winning_team')
         
             # 2 vs winning_team_1
             home_team = df_postseason_teams['team'].iloc[1]
             away_team = winning_team_1
             # simulate game
-            game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
-                                               home_score_array=df_entire_season['home_points'],
-                                               away_team_array=df_entire_season['away_team'],
-                                               away_score_array=df_entire_season['away_points'],
+            game_simulation = game_predictions(home_team_array=df_played['home_team'],
+                                               home_score_array=df_played['home_points'],
+                                               away_team_array=df_played['away_team'],
+                                               away_score_array=df_played['away_points'],
                                                home_team=home_team,
                                                away_team=away_team,
-                                               n_simulations=1,
-                                               weighted_mean=weighted_mean)
+                                               outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                               inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
+                                               weight_home=dict_best_hyperparameters.get('weight_home'),
+                                               weight_away=dict_best_hyperparameters.get('weight_away'),
+                                               n_simulations=1)
             
             # get winner
-            winning_team_4 = who_won(predicted_home_score=game_simulation.mean_home_score, 
-                                     predicted_away_score=game_simulation.mean_away_score, 
-                                     home_team=home_team, away_team=home_team)
+            winning_team_4 = game_simulation.get('winning_team')
         
             # winning_team_3 vs winning_team_4
             # find index of winning_team_3
@@ -547,72 +546,53 @@ def nfl_postseason_probabilities(year, n_simulations, weighted_mean=False, weigh
                 home_team = winning_team_4
                 away_team = winning_team_3
             # simulate game
-            game_simulation = game_predictions(home_team_array=df_entire_season['home_team'],
-                                               home_score_array=df_entire_season['home_points'],
-                                               away_team_array=df_entire_season['away_team'],
-                                               away_score_array=df_entire_season['away_points'],
+            game_simulation = game_predictions(home_team_array=df_played['home_team'],
+                                               home_score_array=df_played['home_points'],
+                                               away_team_array=df_played['away_team'],
+                                               away_score_array=df_played['away_points'],
                                                home_team=home_team,
                                                away_team=away_team,
-                                               n_simulations=1,
-                                               weighted_mean=weighted_mean)
+                                               outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                               inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
+                                               weight_home=dict_best_hyperparameters.get('weight_home'),
+                                               weight_away=dict_best_hyperparameters.get('weight_away'),
+                                               n_simulations=n_simulations)
             
             # get winner
-            conference_champs = who_won(predicted_home_score=game_simulation.mean_home_score, 
-                                        predicted_away_score=game_simulation.mean_away_score, 
-                                        home_team=home_team, away_team=home_team)
+            conference_champs = game_simulation.get('winning_team')
             
             # append conference_champs to list_conference_champs
             list_conference_champs.append(conference_champs)
-            
-        ############################### super bowl ####################################
-        # for super bowl we dont want to separate games by home/away so we will change the function a little
-        # make sure final_afc_points and final_nfc_points are equal
-        final_afc_points = 0
-        final_nfc_points = 0
-        while final_afc_points == final_nfc_points:
-            # instantiate lists
-            list_pred_points_target = []
-            list_pred_points_opp_target = []
-            # iterate through home and away teams
-            for conference_champs in list_conference_champs:
-                # subset to all games involving the conference_champs
-                df_target_scores = df_entire_season[(df_entire_season['home_team'] == conference_champs) | (df_entire_season['away_team'] == conference_champs)]
-                # get home scores only
-                df_target_scores['target_points_only'] = df_target_scores.apply(lambda x: x['home_points'] if x['home_team'] == conference_champs else x['away_points'], axis=1)
-                # get home opponents scores only
-                df_target_scores['target_opp_points_only'] = df_target_scores.apply(lambda x: x['away_points'] if x['home_team'] == conference_champs else x['home_points'], axis=1)
-                # calculate mean points scored by home team
-                if weighted_mean_super_bowl==True:
-                    # get mean points scored by heom_team
-                    mean_points_target = np.average(df_target_scores['target_points_only'], weights=[x for x in range(1, df_target_scores.shape[0]+1)])
-                else:
-                    mean_points_target = np.mean(df_target_scores['target_points_only'])
-                # generate a random number from a poisson distribution with this number as the lambda
-                pred_points_target = np.random.poisson(mean_points_target, 1)[0]
-                # append to list_pred_points_target
-                list_pred_points_target.append(pred_points_target)
-                
-                # calculate mean points allowed by home team
-                if weighted_mean_super_bowl==True:
-                    # get mean points scored by heom_team
-                    mean_opp_points_target = np.average(df_target_scores['target_opp_points_only'], weights=[x for x in range(1, df_target_scores.shape[0]+1)])
-                else:
-                    mean_opp_points_target = np.mean(df_target_scores['target_opp_points_only'])
-                # generate a random number from a poisson distribution with this number as the lambda
-                pred_points_opp_target = np.random.poisson(mean_opp_points_target, 1)[0]
-                # append to list_pred_points_opp_target
-                list_pred_points_opp_target.append(pred_points_opp_target)
-            
-            # calculate predicted points scored for each team in list_conference_champs
-            final_afc_points = (list_pred_points_target[0] + list_pred_points_opp_target[1]) / 2
-            final_nfc_points = (list_pred_points_target[1] + list_pred_points_opp_target[0]) / 2
-        
-        # get super bowl champ
-        if final_afc_points > final_nfc_points:
-            superbowl_champs = list_conference_champs[0]
+            import random
+        ########################### super bowl ####################################
+        # generate random number so home_team and away_team are randomly chosen
+        rand_number_1 = random.randint(0, 1)
+        # assign to home_team/away_team
+        if rand_number_1 == 0:
+            rand_number_2 = 1
         else:
-            superbowl_champs = list_conference_champs[1]
-                
+            rand_number_2 = 0
+        
+        # get home and away teams
+        home_team = list_conference_champs[rand_number_1]
+        away_team = list_conference_champs[rand_number_2]
+        
+        # simulate game
+        game_simulation = game_predictions(home_team_array=df_played['home_team'],
+                                           home_score_array=df_played['home_points'],
+                                           away_team_array=df_played['away_team'],
+                                           away_score_array=df_played['away_points'],
+                                           home_team=home_team,
+                                           away_team=away_team,
+                                           outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                           inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
+                                           weight_home=dict_best_hyperparameters.get('weight_home'),
+                                           weight_away=dict_best_hyperparameters.get('weight_away'),
+                                           n_simulations=n_simulations)
+            
+        # get winning team
+        superbowl_champs = game_simulation.get('winning_team')
+        
         ###############################################################################
         # mark if a team made postseason
         df_teams_postseason['sim_{0}'.format(x)] = df_teams_postseason.apply(lambda x: 1 if x['team'] in list_list_playoff_teams else 0, axis=1)
