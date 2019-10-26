@@ -556,7 +556,7 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
                                                inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
                                                weight_home=dict_best_hyperparameters.get('weight_home'),
                                                weight_away=dict_best_hyperparameters.get('weight_away'),
-                                               n_simulations=n_simulations)
+                                               n_simulations=1)
             
             # get winner
             conference_champs = game_simulation.get('winning_team')
@@ -588,7 +588,7 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
                                            inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
                                            weight_home=dict_best_hyperparameters.get('weight_home'),
                                            weight_away=dict_best_hyperparameters.get('weight_away'),
-                                           n_simulations=n_simulations)
+                                           n_simulations=1)
             
         # get winning team
         superbowl_champs = game_simulation.get('winning_team')
