@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from game_predictions import game_predictions
 import datetime
+import random
 
 # define function for scraping nfl schedule/results
 def scrape_schedule(year):
