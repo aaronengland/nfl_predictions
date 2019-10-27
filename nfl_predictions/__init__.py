@@ -463,9 +463,6 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
             home_team = df_postseason_teams['team'].iloc[2]
             away_team = df_postseason_teams['team'].iloc[5]
             
-            # get the games thathave been played
-            #df_played = df.dropna(subset=['home_points'])
-            
             # simulate game
             game_simulation = game_predictions(home_team_array=df['home_team'],
                                                home_score_array=df['home_points'],
