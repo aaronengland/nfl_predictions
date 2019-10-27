@@ -1,6 +1,6 @@
-numpy==1.16.4
 pandas==0.24.2
-requests==2.22.0
 setuptools==41.0.1
-git+git://github.com/aaronengland/game_predictions #game_predictions==0.1
-beautifulsoup4==4.8.0
+requests==2.22.0
+numpy==1.16.4
+game_predictions==0.1
+beautifulsoup4==4.8.1
