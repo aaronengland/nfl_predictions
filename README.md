@@ -48,7 +48,7 @@ Returns a data frame containing: `Week`, `Home`, `Away`, `Home Points`, `Away Po
 Arguments:
 - `df`: data frame produced from the `scrape_schedule` function.
 - `dict_best_hyperparameters`: dictionary containing the best hyperparameters (returned from `tune_hyperparameters`).
-- `n_simulations`: number of simulations for each contest.
+- `n_simulations`: number of seasons to simulate.
 
 Returns a data frame of the entire season's matchups with the actual scores of the games that have been played and the predicted scores of the games that have not been played.
 
