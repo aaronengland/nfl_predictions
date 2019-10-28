@@ -112,6 +112,9 @@ def scrape_schedule(year):
 
 # define function to tune model parameters
 def tune_hyperparameters(df, week_to_simulate, list_outer_weighted_mean, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away, n_simulations=1000):
+    # calculate spread
+    df['spread'] = df['home_points'] - df['away_points']
+    
     # we will tune our model on one week before week_to_simulate
     week_to_simulate_train = week_to_simulate - 1
 
@@ -124,6 +127,7 @@ def tune_hyperparameters(df, week_to_simulate, list_outer_weighted_mean, list_di
     time_start = datetime.datetime.now()
     # instantiate empty list
     list_sum_correct = []
+    sum_spread_error = []
     list_sum_error = []
     list_dict_outcomes = []
     for outer_weighted_mean in list_outer_weighted_mean:
@@ -160,6 +164,15 @@ def tune_hyperparameters(df, week_to_simulate, list_outer_weighted_mean, list_di
                                 df_predictions['pred_home_points'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('mean_home_pts'), axis=1)
                                 # get predicted away points
                                 df_predictions['pred_away_points'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('mean_away_pts'), axis=1)
+                                # get predicted spread
+                                df_predictions['pred_spread'] = df_predictions['pred_home_points'] - df_predictions['pred_away_points']
+                                # get spread error
+                                df_predictions['pred_spread_error'] = df_predictions.apply(lambda x: np.abs(x['spread'] - x['pred_spread']), axis=1)
+                                # get the total spread error
+                                sum_spread_error = np.sum(df_predictions['pred_spread_error'])
+                                # append to list
+                                list_sum_spread_error.append(sum_spread_error)
+                                
                                 # get absolute difference between home_points and pred_home_points
                                 df_predictions['pred_home_points_error'] = df_predictions.apply(lambda x: np.abs(x['home_points'] - x['pred_home_points']), axis=1)
                                 # get absolute difference between away_points and pred_away_points
@@ -207,6 +220,15 @@ def tune_hyperparameters(df, week_to_simulate, list_outer_weighted_mean, list_di
                     df_predictions['pred_home_points'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('mean_home_pts'), axis=1)
                     # get predicted away points
                     df_predictions['pred_away_points'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('mean_away_pts'), axis=1)
+                    # get predicted spread
+                    df_predictions['pred_spread'] = df_predictions['pred_home_points'] - df_predictions['pred_away_points']
+                    # get spread error
+                    df_predictions['pred_spread_error'] = df_predictions.apply(lambda x: np.abs(x['spread'] - x['pred_spread']), axis=1)
+                    # get the total spread error
+                    sum_spread_error = np.sum(df_predictions['pred_spread_error'])
+                    # append to list
+                    list_sum_spread_error.append(sum_spread_error)
+                                
                     # get absolute difference between home_points and pred_home_points
                     df_predictions['pred_home_points_error'] = df_predictions.apply(lambda x: np.abs(x['home_points'] - x['pred_home_points']), axis=1)
                     # get absolute difference between away_points and pred_away_points
@@ -232,10 +254,11 @@ def tune_hyperparameters(df, week_to_simulate, list_outer_weighted_mean, list_di
     # put outcome lists into a df
     df_outcomes = pd.DataFrame({'hyperparameters': list_dict_outcomes,
                                 'n_correct': list_sum_correct,
-                                'error': list_sum_error})
+                                'spread_error': list_sum_spread_error,
+                                'tot_pts_error': list_sum_error})
     
     # sort values descending
-    df_outcomes_sorted = df_outcomes.sort_values(by=['n_correct','error'], ascending=[False, True])
+    df_outcomes_sorted = df_outcomes.sort_values(by=['n_correct','spread_error','tot_pts_error'], ascending=[False, True, True])
     
     # get the best set of hyperparameters
     dict_best_hyperparameters = df_outcomes_sorted['hyperparameters'].iloc[0]
