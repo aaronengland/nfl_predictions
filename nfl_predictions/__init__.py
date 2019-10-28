@@ -127,7 +127,7 @@ def tune_hyperparameters(df, week_to_simulate, list_outer_weighted_mean, list_di
     time_start = datetime.datetime.now()
     # instantiate empty list
     list_sum_correct = []
-    sum_spread_error = []
+    list_sum_spread_error = []
     list_sum_error = []
     list_dict_outcomes = []
     for outer_weighted_mean in list_outer_weighted_mean:
