@@ -359,7 +359,7 @@ def nfl_season_simulation(df, dict_best_hyperparameters, n_simulations=1000):
     df_final_win_predictions.drop([0], axis=1, inplace=True)    
 
     # get predicted losses
-    df_final_win_predictions['losses'] = 16 - df_final_win_predictions['wins']
+    df_final_win_predictions['losses_ties'] = 16 - df_final_win_predictions['wins']
 
     # sort by wins
     df_final_win_predictions = df_final_win_predictions.sort_values(by=['wins'], ascending=False)
