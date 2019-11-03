@@ -243,27 +243,24 @@ def simulate_current_week(df, week_to_simulate, dict_best_hyperparameters, n_sim
 # define function to simulate a season
 def nfl_season_simulation(df, dict_best_hyperparameters, n_simulations=1000): 
     # get the played games
-    df_played_games = df.dropna(subset=['home_points'])    
+    df_played_games = df.dropna(subset=['home_score'])    
     # get the unplayed games
     df_unplayed_games = df[df.isnull().any(axis=1)]
     
     # apply game_predictions to df_unplayed_games
-    df_unplayed_games['predictions'] = df_unplayed_games.apply(lambda x: game_predictions(home_team_array=df_played_games['home_team'],
-                                                                                          home_score_array=df_played_games['home_points'],
-                                                                                          away_team_array=df_played_games['away_team'],
-                                                                                          away_score_array=df_played_games['away_points'],
+    df_unplayed_games['predictions'] = df_unplayed_games.apply(lambda x: game_predictions(df=df_played_games,
                                                                                           home_team=x['home_team'],
                                                                                           away_team=x['away_team'],
+                                                                                          central_tendency=dict_best_hyperparameters.get('central_tendency'),
                                                                                           distribution=dict_best_hyperparameters.get('distribution'),
-                                                                                          outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
                                                                                           inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
                                                                                           weight_home=dict_best_hyperparameters.get('weight_home'),
                                                                                           weight_away=dict_best_hyperparameters.get('weight_away'),
                                                                                           n_simulations=n_simulations), axis=1)
     
     # put into df_unplayed_games
-    df_unplayed_games['home_points'] = df_unplayed_games.apply(lambda x: x['predictions'].get('mean_home_pts'), axis=1)
-    df_unplayed_games['away_points'] = df_unplayed_games.apply(lambda x: x['predictions'].get('mean_away_pts'), axis=1)
+    df_unplayed_games['home_score'] = df_unplayed_games.apply(lambda x: x['predictions'].get('mean_home_pts'), axis=1)
+    df_unplayed_games['away_score'] = df_unplayed_games.apply(lambda x: x['predictions'].get('mean_away_pts'), axis=1)
     df_unplayed_games['winning_team'] = df_unplayed_games.apply(lambda x: x['predictions'].get('winning_team'), axis=1)
     
     # drop predictions col
