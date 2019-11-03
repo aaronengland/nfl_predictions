@@ -95,18 +95,18 @@ def scrape_schedule(year):
     df = pd.DataFrame({'week': df['week'],
                        'home_team': list_home_team,
                        'away_team': list_away_team,
-                       'home_points': list_home_points,
-                       'away_points': list_away_points}) 
+                       'home_score': list_home_points,
+                       'away_score': list_away_points}) 
         
     # get winning team
-    def get_winner(home_team, away_team, home_points, away_points):
-        if home_points > away_points:
+    def get_winner(home_team, away_team, home_score, away_score):
+        if home_score > away_score:
             return home_team
-        elif home_points < away_points:
+        elif home_score < away_score:
             return away_team
         else:
             return 'tie'
-    df['winning_team'] = df.apply(lambda x: get_winner(home_team=x['home_team'], away_team=x['away_team'], home_points=x['home_points'], away_points=x['away_points']), axis=1)                           
+    df['winning_team'] = df.apply(lambda x: get_winner(home_team=x['home_team'], away_team=x['away_team'], home_score=x['home_score'], away_score=x['away_score']), axis=1)                           
     # return df
     return df
 
