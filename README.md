@@ -6,7 +6,7 @@ To install, use: `pip install git+https://github.com/aaronengland/nfl_prediction
 
 ---
 
-## scrape_schedule
+## scrape_nfl_schedule
 
 Arguments:
 - `year`: season to scrape.
@@ -15,7 +15,7 @@ Returns a data frame with the columns: `week`, `home_team`, `away_team`, `home_p
 
 ---
 
-## tune_hyperparameters
+## tune_nfl_hyperparameters
 
 Arguments:
 - `df`: data frame produced from the `scrape_schedule` function.
@@ -31,7 +31,7 @@ Returns a dictionary containing a data frame of hyperparameter combinations and 
 
 ---
 
-## simulate_current_week
+## simulate_current_nfl_week
 
 Arguments:
 - `df`: data frame produced from the `scrape_schedule` function.
@@ -43,7 +43,7 @@ Returns a data frame containing: `Week`, `Home`, `Away`, `Home Points`, `Away Po
 
 ---
 
-## nfl_season_simulation
+## simulate_nfl_season
 
 Arguments:
 - `df`: data frame produced from the `scrape_schedule` function.
@@ -69,7 +69,7 @@ Example:
 
 ```
 # dependencies
-from nfl_predictions import scrape_schedule, tune_hyperparameters, simulate_current_week, nfl_season_simulation, nfl_postseason_probabilities
+from nfl_predictions import scrape_nfl_schedule, tune_nfl_hyperparameters, simulate_current_nfl_week, simulate_nfl_season, nfl_postseason_probabilities
 
 # save arguments
 # year
@@ -80,31 +80,31 @@ week_to_simulate = 9
 n_simulations = 1000
 
 # scrape schedulde
-df = scrape_schedule(year=2019)
+df = scrape_nfl_schedule(year=2019)
 
 # tune hyperparameters
-hyperparams_tuned = tune_hyperparameters(df=df, 
-                                         week_to_simulate=week_to_simulate, 
-                                         list_central_tendency=['mean','median'], 
-                                         list_distributions=['normal','poisson'], 
-                                         list_inner_weighted_mean=['none','win_pct'], 
-                                         list_weight_home=[1,2], 
-                                         list_weight_away=[1,2], 
-                                         n_simulations=n_simulations)
+hyperparams_tuned = tune_nfl_hyperparameters(df=df, 
+                                             week_to_simulate=week_to_simulate, 
+                                             list_central_tendency=['mean','median'], 
+                                             list_distributions=['normal','poisson'], 
+                                             list_inner_weighted_mean=['none','win_pct'], 
+                                             list_weight_home=[1,2], 
+                                             list_weight_away=[1,2], 
+                                             n_simulations=n_simulations)
 
 # get the best hyperparameters
 dict_best_hyperparameters = hyperparams_tuned.get('dict_best_hyperparameters')
 
 # simulate current week's games
-df_predictions = simulate_current_week(df=df, 
-                                       week_to_simulate=week_to_simulate, 
-                                       dict_best_hyperparameters=dict_best_hyperparameters, 
-                                       n_simulations=n_simulations)
+df_predictions = simulate_current_nfl_week(df=df, 
+                                           week_to_simulate=week_to_simulate, 
+                                           dict_best_hyperparameters=dict_best_hyperparameters, 
+                                           n_simulations=n_simulations)
 
 # simulate season
-season_simulation = nfl_season_simulation(df=df, 
-                                          dict_best_hyperparameters=dict_best_hyperparameters, 
-                                          n_simulations=n_simulations)
+season_simulation = simulate_nfl_season(df=df, 
+                                        dict_best_hyperparameters=dict_best_hyperparameters, 
+                                        n_simulations=n_simulations)
 
 # get the final win totals
 win_totals = season_simulation.get('final_win_predictions_conf')
