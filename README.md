@@ -88,8 +88,8 @@ hyperparams_tuned = tune_nfl_hyperparameters(df=df,
                                              list_central_tendency=['mean','median'], 
                                              list_distributions=['normal','poisson'], 
                                              list_inner_weighted_mean=['none','win_pct'], 
-                                             list_weight_home=[1,2], 
-                                             list_weight_away=[1,2], 
+                                             list_weight_home=[1,2,3,4,5,6,7,8,9,10], 
+                                             list_weight_away=[1,2,3,4,5,6,7,8,9,10], 
                                              n_simulations=n_simulations)
 
 # get the best hyperparameters
@@ -112,7 +112,7 @@ win_totals = season_simulation.get('final_win_predictions_conf')
 # get postseason probabilities
 postseason_prob = nfl_postseason_probabilities(df=df, 
                                                dict_best_hyperparameters=dict_best_hyperparameters,
-                                               n_simulations=n_simulations)
+                                               n_simulations=100)
 ```
 
 
