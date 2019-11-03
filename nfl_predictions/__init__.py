@@ -418,13 +418,11 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
             away_team = df_postseason_teams['team'].iloc[5]
             
             # simulate game
-            game_simulation = game_predictions(home_team_array=df['home_team'],
-                                               home_score_array=df['home_points'],
-                                               away_team_array=df['away_team'],
-                                               away_score_array=df['away_points'],
+            game_simulation = game_predictions(df=df,
                                                home_team=home_team,
                                                away_team=away_team,
-                                               outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                               central_tendency=dict_best_hyperparameters.get('central_tendency'),
+                                               distribution=dict_best_hyperparameters.get('distribution'),
                                                inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
                                                weight_home=dict_best_hyperparameters.get('weight_home'),
                                                weight_away=dict_best_hyperparameters.get('weight_away'),
@@ -436,13 +434,11 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
             home_team = df_postseason_teams['team'].iloc[3]
             away_team = df_postseason_teams['team'].iloc[4]
                 # simulate game
-            game_simulation = game_predictions(home_team_array=df['home_team'],
-                                               home_score_array=df['home_points'],
-                                               away_team_array=df['away_team'],
-                                               away_score_array=df['away_points'],
+            game_simulation = game_predictions(df=df,
                                                home_team=home_team,
                                                away_team=away_team,
-                                               outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                               central_tendency=dict_best_hyperparameters.get('central_tendency'),
+                                               distribution=dict_best_hyperparameters.get('distribution'),
                                                inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
                                                weight_home=dict_best_hyperparameters.get('weight_home'),
                                                weight_away=dict_best_hyperparameters.get('weight_away'),
@@ -454,13 +450,11 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
             home_team = df_postseason_teams['team'].iloc[0]
             away_team = winning_team_2
             # simulate game
-            game_simulation = game_predictions(home_team_array=df['home_team'],
-                                               home_score_array=df['home_points'],
-                                               away_team_array=df['away_team'],
-                                               away_score_array=df['away_points'],
+            game_simulation = game_predictions(df=df,
                                                home_team=home_team,
                                                away_team=away_team,
-                                               outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                               central_tendency=dict_best_hyperparameters.get('central_tendency'),
+                                               distribution=dict_best_hyperparameters.get('distribution'),
                                                inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
                                                weight_home=dict_best_hyperparameters.get('weight_home'),
                                                weight_away=dict_best_hyperparameters.get('weight_away'),
@@ -472,13 +466,11 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
             home_team = df_postseason_teams['team'].iloc[1]
             away_team = winning_team_1
             # simulate game
-            game_simulation = game_predictions(home_team_array=df['home_team'],
-                                               home_score_array=df['home_points'],
-                                               away_team_array=df['away_team'],
-                                               away_score_array=df['away_points'],
+            game_simulation = game_predictions(df=df,
                                                home_team=home_team,
                                                away_team=away_team,
-                                               outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                               central_tendency=dict_best_hyperparameters.get('central_tendency'),
+                                               distribution=dict_best_hyperparameters.get('distribution'),
                                                inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
                                                weight_home=dict_best_hyperparameters.get('weight_home'),
                                                weight_away=dict_best_hyperparameters.get('weight_away'),
@@ -499,13 +491,11 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
                 home_team = winning_team_4
                 away_team = winning_team_3
             # simulate game
-            game_simulation = game_predictions(home_team_array=df['home_team'],
-                                               home_score_array=df['home_points'],
-                                               away_team_array=df['away_team'],
-                                               away_score_array=df['away_points'],
+            game_simulation = game_predictions(df=df,
                                                home_team=home_team,
                                                away_team=away_team,
-                                               outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                               central_tendency=dict_best_hyperparameters.get('central_tendency'),
+                                               distribution=dict_best_hyperparameters.get('distribution'),
                                                inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
                                                weight_home=dict_best_hyperparameters.get('weight_home'),
                                                weight_away=dict_best_hyperparameters.get('weight_away'),
@@ -530,13 +520,11 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
         away_team = list_conference_champs[rand_number_2]
         
         # simulate game
-        game_simulation = game_predictions(home_team_array=df['home_team'],
-                                           home_score_array=df['home_points'],
-                                           away_team_array=df['away_team'],
-                                           away_score_array=df['away_points'],
+        game_simulation = game_predictions(df=df,
                                            home_team=home_team,
                                            away_team=away_team,
-                                           outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'),
+                                           central_tendency=dict_best_hyperparameters.get('central_tendency'),
+                                           distribution=dict_best_hyperparameters.get('distribution'),
                                            inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
                                            weight_home=dict_best_hyperparameters.get('weight_home'),
                                            weight_away=dict_best_hyperparameters.get('weight_away'),
