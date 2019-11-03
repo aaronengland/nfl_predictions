@@ -7,7 +7,7 @@ import datetime
 import random
 
 # define function for scraping nfl schedule/results
-def scrape_schedule(year):
+def scrape_nfl_schedule(year):
     # get url
     r = requests.get('https://www.pro-football-reference.com/years/{0}/games.htm'.format(year))
     # get content of page
