@@ -71,25 +71,25 @@ Example:
 # dependencies
 from nfl_predictions import scrape_schedule, tune_hyperparameters, simulate_current_week, nfl_season_simulation, nfl_postseason_probabilities
 
-# save the arguments
+# save arguments
 # year
 year = 2019
 # week to simulate
-week_to_simulate = 8
+week_to_simulate = 9
 # number of simulations
 n_simulations = 1000
 
 # scrape schedulde
-df = scrape_schedule(year=year)
+df = scrape_schedule(year=2019)
 
 # tune hyperparameters
 hyperparams_tuned = tune_hyperparameters(df=df, 
-                                         week_to_simulate=week_to_simulate,
-                                         list_outer_weighted_mean = ['all_games_weighted','none','time','opp_win_pct'],
-                                         list_distributions = ['poisson','normal'],
-                                         list_inner_weighted_mean = ['none','win_pct'],
-                                         list_weight_home = [1,2,3],
-                                         list_weight_away = [1,2,3],
+                                         week_to_simulate=week_to_simulate, 
+                                         list_central_tendency=['mean','median'], 
+                                         list_distributions=['normal','poisson'], 
+                                         list_inner_weighted_mean=['none','win_pct'], 
+                                         list_weight_home=[1,2], 
+                                         list_weight_away=[1,2], 
                                          n_simulations=n_simulations)
 
 # get the best hyperparameters
@@ -109,8 +109,7 @@ season_simulation = nfl_season_simulation(df=df,
 # get the final win totals
 win_totals = season_simulation.get('final_win_predictions_conf')
 
-
-# define function for postseason probabilities
+# get postseason probabilities
 postseason_prob = nfl_postseason_probabilities(df=df, 
                                                dict_best_hyperparameters=dict_best_hyperparameters,
                                                n_simulations=n_simulations)
