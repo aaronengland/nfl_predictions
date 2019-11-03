@@ -110,7 +110,7 @@ def scrape_nfl_schedule(year):
     # return df
     return df
 
-def tune_hyperparameters(df, week_to_simulate, list_central_tendency, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away, n_simulations=1000):
+def tune_nfl_hyperparameters(df, week_to_simulate, list_central_tendency, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away, n_simulations=1000):
     # calculate spread
     df['spread'] = df['home_score'] - df['away_score']
     
@@ -208,7 +208,7 @@ def tune_hyperparameters(df, week_to_simulate, list_central_tendency, list_distr
     return dict_results
 
 # define function to simulate current week's games
-def simulate_current_week(df, week_to_simulate, dict_best_hyperparameters, n_simulations):
+def simulate_current_nfl_week(df, week_to_simulate, dict_best_hyperparameters, n_simulations):
     # drop everything after week X
     df_data = df[df['week'] < week_to_simulate]
     # get the games to simulate
@@ -241,7 +241,7 @@ def simulate_current_week(df, week_to_simulate, dict_best_hyperparameters, n_sim
     return df_predictions
 
 # define function to simulate a season
-def nfl_season_simulation(df, dict_best_hyperparameters, n_simulations=1000): 
+def simulate_nfl_season(df, dict_best_hyperparameters, n_simulations=1000): 
     # get the played games
     df_played_games = df.dropna(subset=['home_score'])    
     # get the unplayed games
@@ -340,7 +340,7 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
     # user defined number of simulations
     for x in range(n_simulations):
         # simulate season
-        simulated_season = nfl_season_simulation(df=df, 
+        simulated_season = simulate_nfl_season(df=df, 
                                                  dict_best_hyperparameters=dict_best_hyperparameters,
                                                  n_simulations=1)
         
