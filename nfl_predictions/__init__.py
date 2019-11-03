@@ -215,13 +215,10 @@ def simulate_current_week(df, week_to_simulate, dict_best_hyperparameters, n_sim
     df_predictions = df[df['week'] == week_to_simulate]
     
     # generate my predictions
-    df_predictions['pred_outcome'] = df_predictions.apply(lambda x: game_predictions(home_team_array=df_data['home_team'], 
-                                                                                     home_score_array=df_data['home_points'], 
-                                                                                     away_team_array=df_data['away_team'], 
-                                                                                     away_score_array=df_data['away_points'], 
+    df_predictions['pred_outcome'] = df_predictions.apply(lambda x: game_predictions(df=df_data, 
                                                                                      home_team=x['home_team'], 
                                                                                      away_team=x['away_team'], 
-                                                                                     outer_weighted_mean=dict_best_hyperparameters.get('outer_weighted_mean'), 
+                                                                                     central_tendency=dict_best_hyperparameters.get('central_tendency'),
                                                                                      distribution=dict_best_hyperparameters.get('distribution'),
                                                                                      inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'), 
                                                                                      weight_home=dict_best_hyperparameters.get('weight_home'),
@@ -235,7 +232,7 @@ def simulate_current_week(df, week_to_simulate, dict_best_hyperparameters, n_sim
         df_predictions[key] = df_predictions.apply(lambda x: x['pred_outcome'].get(key), axis=1)
     
     # drop cols
-    df_predictions.drop(['home_points','away_points','pred_outcome'], inplace=True, axis=1)
+    df_predictions.drop(['home_score','away_score','spread','pred_outcome'], inplace=True, axis=1)
     
     # rename the cols
     df_predictions.columns = ['Week','Home','Away','Home Points','Away Points','Home Win Probability','Winning Team']
