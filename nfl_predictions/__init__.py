@@ -239,7 +239,7 @@ def simulate_current_nfl_week(df, week_to_simulate, dict_best_hyperparameters, n
         df_predictions[key] = df_predictions.apply(lambda x: x['pred_outcome'].get(key), axis=1)
     
     # drop cols
-    df_predictions.drop(['home_score','away_score','spread','pred_outcome'], inplace=True, axis=1)
+    df_predictions.drop(['home_score','away_score','pred_outcome'], inplace=True, axis=1)
     
     # rename the cols
     df_predictions.columns = ['Week','Home','Away','Home Points','Away Points','Home Win Probability','Winning Team']
