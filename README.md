@@ -84,12 +84,12 @@ df = scrape_nfl_schedule(year=2019)
 
 # tune hyperparameters
 hyperparams_tuned = tune_nfl_hyperparameters(df=df, 
-                                             week_to_simulate=week_to_simulate, 
                                              list_central_tendency=['mean','median'], 
                                              list_distributions=['normal','poisson'], 
                                              list_inner_weighted_mean=['none','win_pct'], 
                                              list_weight_home=[1,2,3,4,5,6,7,8,9,10], 
                                              list_weight_away=[1,2,3,4,5,6,7,8,9,10], 
+                                             train_size=0.66,
                                              n_simulations=n_simulations)
 
 # get the best hyperparameters
