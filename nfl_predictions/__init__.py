@@ -110,17 +110,24 @@ def scrape_nfl_schedule(year):
     # return df
     return df
 
-def tune_nfl_hyperparameters(df, week_to_simulate, list_central_tendency, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away, n_simulations=1000):
+# define function for tuning hyperparameters
+def tune_nfl_hyperparameters(df, list_central_tendency, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away, train_size=.66, n_simulations=1000):
+    # suppress the SettingWithCopyWarning
+    pd.options.mode.chained_assignment = None
+    # drop the unplayed games
+    df_played = df.dropna(subset=['home_score'])
     # calculate spread
-    df['spread'] = df['home_score'] - df['away_score']
+    df_played['spread'] = df_played['home_score'] - df_played['away_score']
     
-    # we will tune our model on one week before week_to_simulate
-    week_to_simulate_train = week_to_simulate - 1
-
-    # drop everything after week X
-    df_data = df[df['week'] < week_to_simulate_train]
-    # get the games to simulate
-    df_predictions = df[df['week'] == week_to_simulate_train]
+    # get the number of rows in train size
+    nrows = df_played.shape[0]
+    # multiply by train_size
+    n_train = round(train_size * nrows)
+    
+    # get the training data
+    df_train = df_played[:n_train]
+    # get the testing data
+    df_test = df_played[n_train:]
     
     # time to tune model
     time_start = datetime.datetime.now()
@@ -135,41 +142,41 @@ def tune_nfl_hyperparameters(df, week_to_simulate, list_central_tendency, list_d
                 for weight_home in list_weight_home:
                     for weight_away in list_weight_away:
                         # predict every game in df_predictions
-                        df_predictions['pred_outcome'] = df_predictions.apply(lambda x: game_predictions(df=df_data, 
-                                                                                                         home_team=x['home_team'], 
-                                                                                                         away_team=x['away_team'], 
-                                                                                                         central_tendency=central_tendency,
-                                                                                                         distribution=distribution,
-                                                                                                         inner_weighted_mean=inner_weighted_mean, 
-                                                                                                         weight_home=weight_home,
-                                                                                                         weight_away=weight_away,
-                                                                                                         n_simulations=n_simulations), axis=1)
+                        df_test['pred_outcome'] = df_test.apply(lambda x: game_predictions(df=df_train, 
+                                                                                           home_team=x['home_team'], 
+                                                                                           away_team=x['away_team'], 
+                                                                                           central_tendency=central_tendency,
+                                                                                           distribution=distribution,
+                                                                                           inner_weighted_mean=inner_weighted_mean, 
+                                                                                           weight_home=weight_home,
+                                                                                           weight_away=weight_away,
+                                                                                           n_simulations=n_simulations), axis=1)
                 
                         # get winning team
-                        df_predictions['pred_winning_team'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('winning_team'), axis=1)
+                        df_test['pred_winning_team'] = df_test.apply(lambda x: (x['pred_outcome']).get('winning_team'), axis=1)
                         # get number right
-                        sum_correct = np.sum(df_predictions.apply(lambda x: 1 if x['winning_team'] == x['pred_winning_team'] else 0, axis=1))
+                        sum_correct = np.sum(df_test.apply(lambda x: 1 if x['winning_team'] == x['pred_winning_team'] else 0, axis=1))
                         # append to list
                         list_sum_correct.append(sum_correct)
                         
                         # get proportion correct
-                        proportion_correct = sum_correct/df_predictions.shape[0]
+                        proportion_correct = sum_correct/df_test.shape[0]
                         # append to list
                         list_proportion_correct.append(proportion_correct)
                         
                         # get the RMSE of spread so we can sort by that as well
                         # get predicted home points
-                        df_predictions['pred_home_points'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('mean_home_pts'), axis=1)
+                        df_test['pred_home_points'] = df_test.apply(lambda x: (x['pred_outcome']).get('mean_home_pts'), axis=1)
                         # get predicted away points
-                        df_predictions['pred_away_points'] = df_predictions.apply(lambda x: (x['pred_outcome']).get('mean_away_pts'), axis=1)
+                        df_test['pred_away_points'] = df_test.apply(lambda x: (x['pred_outcome']).get('mean_away_pts'), axis=1)
                         # get predicted spread
-                        df_predictions['pred_spread'] = df_predictions['pred_home_points'] - df_predictions['pred_away_points']
+                        df_test['pred_spread'] = df_test['pred_home_points'] - df_test['pred_away_points']
                         # get spread error
-                        df_predictions['pred_spread_error'] = df_predictions.apply(lambda x: np.abs(x['spread'] - x['pred_spread']), axis=1)
+                        df_test['pred_spread_error'] = df_test.apply(lambda x: np.abs(x['spread'] - x['pred_spread']), axis=1)
                         # get the squared error
-                        df_predictions['spred_squared_error'] = df_predictions.apply(lambda x: x['pred_spread_error']**2, axis=1)
+                        df_test['spred_squared_error'] = df_test.apply(lambda x: x['pred_spread_error']**2, axis=1)
                         # get MSE
-                        spread_mse = np.mean(df_predictions['spred_squared_error'])
+                        spread_mse = np.mean(df_test['spred_squared_error'])
                         # square root it to get RMSE
                         spread_rmse = np.sqrt(spread_mse)
                         # append to list
