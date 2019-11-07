@@ -79,7 +79,7 @@ week_to_simulate = 9
 # number of simulations
 n_simulations = 1000
 
-# scrape schedulde
+# scrape schedule
 df = scrape_nfl_schedule(year=2019)
 
 # tune hyperparameters
