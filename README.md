@@ -25,7 +25,7 @@ Arguments:
 - `list_weight_home`: list of weights to apply to games where the home team is home (see `game_predictions`).
 - `list_weight_away`: list of weights to apply to games where the away team is away (see `game_predictions`).
 - `train_size`: proportion of previously played games to use as training data (default = 0.66).
-- `n_simulations`: number of simulations for each contest.
+- `n_simulations`: number of simulations for each contest (default = 1000).
 
 Returns a dictionary containing a data frame of hyperparameter combinations and the corresponding correctly predicted wins and total error in predicted vs. actual points scored.
 
