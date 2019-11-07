@@ -22,8 +22,8 @@ Arguments:
 - `list_central_tendency`: list of modes of central tendency (see `game_predictions`).
 - `list_distributions`: list of distributions to use for generating predictions (see `game_predictions`). 
 - `list_inner_weighted_mean`: list of weights for the inner weighted mean (see `game_predictions`).
-- `list_weight_home`: list of weights to apply to games where the home team is home (can only be used when `outer_weighted_mean` is `all_games_weighted`; see `game_predictions`).
-- `list_weight_away`: list of weights to apply to games where the away team is away (can only be used when `outer_weighted_mean` is `all_games_weighted`; see `game_predictions`).
+- `list_weight_home`: list of weights to apply to games where the home team is home (see `game_predictions`).
+- `list_weight_away`: list of weights to apply to games where the away team is away (see `game_predictions`).
 - `train_size`: proportion of previously played games to use as training data (default = 0.66).
 - `n_simulations`: number of simulations for each contest.
 
