@@ -4,3 +4,4 @@ requests==2.22.0
 numpy==1.16.4
 game_predictions==0.1
 beautifulsoup4==4.8.1
+wquantiles==0.5
