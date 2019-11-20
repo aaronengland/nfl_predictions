@@ -19,6 +19,7 @@ Returns a data frame with the columns: `week`, `home_team`, `away_team`, `home_p
 
 Arguments:
 - `df`: data frame produced from the `scrape_schedule` function.
+- `last_n_games`: list of most recent games to include in analysis (see `game_predictions`).
 - `list_central_tendency`: list of modes of central tendency (see `game_predictions`).
 - `list_distributions`: list of distributions to use for generating predictions (see `game_predictions`). 
 - `list_inner_weighted_mean`: list of weights for the inner weighted mean (see `game_predictions`).
@@ -84,6 +85,7 @@ df = scrape_nfl_schedule(year=2019)
 
 # tune hyperparameters
 hyperparams_tuned = tune_nfl_hyperparameters(df=df, 
+                                             list_last_n_games=[1,2,3,4,5,'all'],
                                              list_central_tendency=['mean','median'], 
                                              list_distributions=['normal','poisson'], 
                                              list_inner_weighted_mean=['none','win_pct'], 
