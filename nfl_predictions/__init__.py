@@ -111,7 +111,7 @@ def scrape_nfl_schedule(year):
     return df
 
 # define function for tuning hyperparameters
-def tune_nfl_hyperparameters(df, list_central_tendency, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away, train_size=.66, n_simulations=1000):
+def tune_nfl_hyperparameters(df, list_last_n_games, list_central_tendency, list_distributions, list_inner_weighted_mean, list_weight_home, list_weight_away, train_size=.66, n_simulations=1000):
     # suppress the SettingWithCopyWarning
     pd.options.mode.chained_assignment = None
     # drop the unplayed games
@@ -136,60 +136,63 @@ def tune_nfl_hyperparameters(df, list_central_tendency, list_distributions, list
     list_proportion_correct = []
     list_spread_rmse = []
     list_dict_outcomes = []
-    for central_tendency in list_central_tendency:
-        for distribution in list_distributions:
-            for inner_weighted_mean in list_inner_weighted_mean:
-                for weight_home in list_weight_home:
-                    for weight_away in list_weight_away:
-                        # predict every game in df_predictions
-                        df_test['pred_outcome'] = df_test.apply(lambda x: game_predictions(df=df_train, 
-                                                                                           home_team=x['home_team'], 
-                                                                                           away_team=x['away_team'], 
-                                                                                           central_tendency=central_tendency,
-                                                                                           distribution=distribution,
-                                                                                           inner_weighted_mean=inner_weighted_mean, 
-                                                                                           weight_home=weight_home,
-                                                                                           weight_away=weight_away,
-                                                                                           n_simulations=n_simulations), axis=1)
-                
-                        # get winning team
-                        df_test['pred_winning_team'] = df_test.apply(lambda x: (x['pred_outcome']).get('winning_team'), axis=1)
-                        # get number right
-                        sum_correct = np.sum(df_test.apply(lambda x: 1 if x['winning_team'] == x['pred_winning_team'] else 0, axis=1))
-                        # append to list
-                        list_sum_correct.append(sum_correct)
-                        
-                        # get proportion correct
-                        proportion_correct = sum_correct/df_test.shape[0]
-                        # append to list
-                        list_proportion_correct.append(proportion_correct)
-                        
-                        # get the RMSE of spread so we can sort by that as well
-                        # get predicted home points
-                        df_test['pred_home_points'] = df_test.apply(lambda x: (x['pred_outcome']).get('mean_home_pts'), axis=1)
-                        # get predicted away points
-                        df_test['pred_away_points'] = df_test.apply(lambda x: (x['pred_outcome']).get('mean_away_pts'), axis=1)
-                        # get predicted spread
-                        df_test['pred_spread'] = df_test['pred_home_points'] - df_test['pred_away_points']
-                        # get spread error
-                        df_test['pred_spread_error'] = df_test.apply(lambda x: np.abs(x['spread'] - x['pred_spread']), axis=1)
-                        # get the squared error
-                        df_test['spred_squared_error'] = df_test.apply(lambda x: x['pred_spread_error']**2, axis=1)
-                        # get MSE
-                        spread_mse = np.mean(df_test['spred_squared_error'])
-                        # square root it to get RMSE
-                        spread_rmse = np.sqrt(spread_mse)
-                        # append to list
-                        list_spread_rmse.append(spread_rmse)
-                                
-                        # create dictionary
-                        dict_outcomes = {'central_tendency': central_tendency,
-                                         'distribution': distribution,
-                                         'inner_weighted_mean': inner_weighted_mean,
-                                         'weight_home': weight_home,
-                                         'weight_away': weight_away}
-                        # append to list
-                        list_dict_outcomes.append(dict_outcomes)
+    for last_n_games in list_last_n_games:
+        for central_tendency in list_central_tendency:
+            for distribution in list_distributions:
+                for inner_weighted_mean in list_inner_weighted_mean:
+                    for weight_home in list_weight_home:
+                        for weight_away in list_weight_away:
+                            # predict every game in df_predictions
+                            df_test['pred_outcome'] = df_test.apply(lambda x: game_predictions(df=df_train, 
+                                                                                               home_team=x['home_team'], 
+                                                                                               away_team=x['away_team'], 
+                                                                                               last_n_games=last_n_games,
+                                                                                               central_tendency=central_tendency,
+                                                                                               distribution=distribution,
+                                                                                               inner_weighted_mean=inner_weighted_mean, 
+                                                                                               weight_home=weight_home,
+                                                                                               weight_away=weight_away,
+                                                                                               n_simulations=n_simulations), axis=1)
+                    
+                            # get winning team
+                            df_test['pred_winning_team'] = df_test.apply(lambda x: (x['pred_outcome']).get('winning_team'), axis=1)
+                            # get number right
+                            sum_correct = np.sum(df_test.apply(lambda x: 1 if x['winning_team'] == x['pred_winning_team'] else 0, axis=1))
+                            # append to list
+                            list_sum_correct.append(sum_correct)
+                            
+                            # get proportion correct
+                            proportion_correct = sum_correct/df_test.shape[0]
+                            # append to list
+                            list_proportion_correct.append(proportion_correct)
+                            
+                            # get the RMSE of spread so we can sort by that as well
+                            # get predicted home points
+                            df_test['pred_home_points'] = df_test.apply(lambda x: (x['pred_outcome']).get('mean_home_pts'), axis=1)
+                            # get predicted away points
+                            df_test['pred_away_points'] = df_test.apply(lambda x: (x['pred_outcome']).get('mean_away_pts'), axis=1)
+                            # get predicted spread
+                            df_test['pred_spread'] = df_test['pred_home_points'] - df_test['pred_away_points']
+                            # get spread error
+                            df_test['pred_spread_error'] = df_test.apply(lambda x: np.abs(x['spread'] - x['pred_spread']), axis=1)
+                            # get the squared error
+                            df_test['spred_squared_error'] = df_test.apply(lambda x: x['pred_spread_error']**2, axis=1)
+                            # get MSE
+                            spread_mse = np.mean(df_test['spred_squared_error'])
+                            # square root it to get RMSE
+                            spread_rmse = np.sqrt(spread_mse)
+                            # append to list
+                            list_spread_rmse.append(spread_rmse)
+                                    
+                            # create dictionary
+                            dict_outcomes = {'last_n_games': last_n_games,
+                                             'central_tendency': central_tendency,
+                                             'distribution': distribution,
+                                             'inner_weighted_mean': inner_weighted_mean,
+                                             'weight_home': weight_home,
+                                             'weight_away': weight_away}
+                            # append to list
+                            list_dict_outcomes.append(dict_outcomes)
     # get elapsed time
     elapsed_time = (datetime.datetime.now() - time_start).seconds
     # print message
@@ -225,6 +228,7 @@ def simulate_current_nfl_week(df, week_to_simulate, dict_best_hyperparameters, n
     df_predictions['pred_outcome'] = df_predictions.apply(lambda x: game_predictions(df=df_data, 
                                                                                      home_team=x['home_team'], 
                                                                                      away_team=x['away_team'], 
+                                                                                     last_n_games=dict_best_hyperparameters.get('last_n_games'),
                                                                                      central_tendency=dict_best_hyperparameters.get('central_tendency'),
                                                                                      distribution=dict_best_hyperparameters.get('distribution'),
                                                                                      inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'), 
@@ -258,6 +262,7 @@ def simulate_nfl_season(df, dict_best_hyperparameters, n_simulations=1000):
     df_unplayed_games['predictions'] = df_unplayed_games.apply(lambda x: game_predictions(df=df_played_games,
                                                                                           home_team=x['home_team'],
                                                                                           away_team=x['away_team'],
+                                                                                          last_n_games=dict_best_hyperparameters.get('last_n_games'),
                                                                                           central_tendency=dict_best_hyperparameters.get('central_tendency'),
                                                                                           distribution=dict_best_hyperparameters.get('distribution'),
                                                                                           inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
@@ -428,6 +433,7 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
             game_simulation = game_predictions(df=df,
                                                home_team=home_team,
                                                away_team=away_team,
+                                               last_n_games=dict_best_hyperparameters.get('last_n_games'),
                                                central_tendency=dict_best_hyperparameters.get('central_tendency'),
                                                distribution=dict_best_hyperparameters.get('distribution'),
                                                inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
@@ -444,6 +450,7 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
             game_simulation = game_predictions(df=df,
                                                home_team=home_team,
                                                away_team=away_team,
+                                               last_n_games=dict_best_hyperparameters.get('last_n_games'),
                                                central_tendency=dict_best_hyperparameters.get('central_tendency'),
                                                distribution=dict_best_hyperparameters.get('distribution'),
                                                inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
@@ -460,6 +467,7 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
             game_simulation = game_predictions(df=df,
                                                home_team=home_team,
                                                away_team=away_team,
+                                               last_n_games=dict_best_hyperparameters.get('last_n_games'),
                                                central_tendency=dict_best_hyperparameters.get('central_tendency'),
                                                distribution=dict_best_hyperparameters.get('distribution'),
                                                inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
@@ -476,6 +484,7 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
             game_simulation = game_predictions(df=df,
                                                home_team=home_team,
                                                away_team=away_team,
+                                               last_n_games=dict_best_hyperparameters.get('last_n_games'),
                                                central_tendency=dict_best_hyperparameters.get('central_tendency'),
                                                distribution=dict_best_hyperparameters.get('distribution'),
                                                inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
@@ -501,6 +510,7 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
             game_simulation = game_predictions(df=df,
                                                home_team=home_team,
                                                away_team=away_team,
+                                               last_n_games=dict_best_hyperparameters.get('last_n_games'),
                                                central_tendency=dict_best_hyperparameters.get('central_tendency'),
                                                distribution=dict_best_hyperparameters.get('distribution'),
                                                inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
@@ -530,6 +540,7 @@ def nfl_postseason_probabilities(df, dict_best_hyperparameters, n_simulations):
         game_simulation = game_predictions(df=df,
                                            home_team=home_team,
                                            away_team=away_team,
+                                           last_n_games=dict_best_hyperparameters.get('last_n_games'),
                                            central_tendency=dict_best_hyperparameters.get('central_tendency'),
                                            distribution=dict_best_hyperparameters.get('distribution'),
                                            inner_weighted_mean=dict_best_hyperparameters.get('inner_weighted_mean'),
