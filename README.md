@@ -19,10 +19,11 @@ Returns a data frame with the columns: `week`, `home_team`, `away_team`, `home_p
 
 Arguments:
 - `df`: data frame produced from the `scrape_schedule` function.
-- `last_n_games`: list of most recent games to include in analysis (see `game_predictions`).
+- `list_last_n_games`: list of most recent games to include in analysis (see `game_predictions`).
+- `list_outer_opp_win_pct`: list of boolean values (see `game_predictions`).
 - `list_central_tendency`: list of modes of central tendency (see `game_predictions`).
 - `list_distributions`: list of distributions to use for generating predictions (see `game_predictions`). 
-- `list_inner_weighted_mean`: list of weights for the inner weighted mean (see `game_predictions`).
+- `list_inner_opp_win_pct`: list of boolean values (see `game_predictions`).
 - `list_weight_home`: list of weights to apply to games where the home team is home (see `game_predictions`).
 - `list_weight_away`: list of weights to apply to games where the away team is away (see `game_predictions`).
 - `train_size`: proportion of previously played games to use as training data (default = 0.66).
