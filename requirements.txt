@@ -1,6 +1,6 @@
 pandas==0.24.2
 setuptools==41.0.1
 requests==2.22.0
-numpy==1.16.4
+numpy==1.22.0
 game_predictions==0.1
 beautifulsoup4==4.8.1
