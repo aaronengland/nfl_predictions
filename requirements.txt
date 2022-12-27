@@ -1,5 +1,5 @@
 pandas==0.24.2
-setuptools==41.0.1
+setuptools==65.5.1
 requests==2.22.0
 numpy==1.16.4
 game_predictions==0.1
